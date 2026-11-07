@@ -171,3 +171,4 @@ pnpm start
 - **Validation & Typage** : [TypeScript](https://www.typescriptlang.org/) (Strict), [Zod](https://zod.dev/)
 - **Tests** : [Vitest](https://vitest.dev/)
 - **IA locale** : [Ollama](https://ollama.com/)
+
