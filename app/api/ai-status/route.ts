@@ -10,3 +10,4 @@ export async function GET() {
     isLocalOllama: (process.env.AI_PROVIDER || "").toLowerCase() === "ollama",
   });
 }
+

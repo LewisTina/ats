@@ -142,3 +142,4 @@ export function JobCard({ value, onChange, onClear }: JobCardProps) {
     </div>
   );
 }
+

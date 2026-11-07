@@ -95,3 +95,4 @@ describe("Multi-CV Comparator", () => {
     expect(report.recommendationReason).toContain("couvre l'ensemble des critères obligatoires");
   });
 });
+

@@ -11,7 +11,7 @@ export interface AIProvider {
   analyze(
     resumeText: string,
     jobText: string,
-    targetPosition: TargetPosition
+    targetPosition: TargetPosition,
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }>;
 }
 
@@ -25,7 +25,9 @@ export class ConfigurableLLMProvider implements AIProvider {
   constructor() {
     this.providerType = (process.env.AI_PROVIDER || "openai").toLowerCase();
     this.apiKey = process.env.AI_API_KEY;
-    this.model = process.env.AI_MODEL || (this.providerType === "ollama" ? "llama3" : "gpt-4o-mini");
+    this.model =
+      process.env.AI_MODEL ||
+      (this.providerType === "ollama" ? "llama3" : "gpt-4o-mini");
 
     if (process.env.AI_BASE_URL) {
       this.baseUrl = process.env.AI_BASE_URL;
@@ -35,7 +37,8 @@ export class ConfigurableLLMProvider implements AIProvider {
           this.baseUrl = "https://openrouter.ai/api/v1";
           break;
         case "gemini":
-          this.baseUrl = "https://generativelanguage.googleapis.com/v1beta/openai";
+          this.baseUrl =
+            "https://generativelanguage.googleapis.com/v1beta/openai";
           break;
         case "groq":
           this.baseUrl = "https://api.groq.com/openai/v1";
@@ -63,7 +66,7 @@ export class ConfigurableLLMProvider implements AIProvider {
   async analyze(
     resumeText: string,
     jobText: string,
-    targetPosition: TargetPosition
+    targetPosition: TargetPosition,
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }> {
     if (!this.isConfigured()) {
       return {
@@ -72,7 +75,11 @@ export class ConfigurableLLMProvider implements AIProvider {
       };
     }
 
-    const { systemPrompt, userPrompt } = buildAIPrompt(resumeText, jobText, targetPosition);
+    const { systemPrompt, userPrompt } = buildAIPrompt(
+      resumeText,
+      jobText,
+      targetPosition,
+    );
     const endpoint = `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
 
     const headers: Record<string, string> = {
@@ -154,7 +161,8 @@ export class ConfigurableLLMProvider implements AIProvider {
         if (err.name === "AbortError") {
           return {
             success: false,
-            error: "Délai d'attente dépassé (timeout 45s) lors de l'appel au fournisseur IA.",
+            error:
+              "Délai d'attente dépassé (timeout 45s) lors de l'appel au fournisseur IA.",
           };
         }
         return {

@@ -90,3 +90,4 @@ ${resumeText}
 
   return { systemPrompt, userPrompt };
 }
+

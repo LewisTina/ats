@@ -18,16 +18,34 @@ interface TextItem {
 export async function parsePdfBuffer(buffer: Buffer | Uint8Array): Promise<PdfParseResult> {
   const warnings: ExtractionWarning[] = [];
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const path = await import("path");
+  const fs = await import("fs");
 
-  const data = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  // pdfjs-dist strictly requires a pure Uint8Array and throws if Buffer.isBuffer(data) is true.
+  // In Node.js, Buffer is an instance of Uint8Array, so new Uint8Array(buffer) copies into a pure Uint8Array.
+  const data = new Uint8Array(buffer);
 
   try {
-    const loadingTask = pdfjs.getDocument({
+    const cMapDir = path.join(process.cwd(), "node_modules/pdfjs-dist/cmaps/");
+    const fontDir = path.join(process.cwd(), "node_modules/pdfjs-dist/standard_fonts/");
+
+    const docOptions: Record<string, unknown> = {
       data,
       useSystemFonts: true,
       disableFontFace: true,
       isEvalSupported: false,
-    });
+    };
+
+    if (fs.existsSync(cMapDir)) {
+      docOptions.cMapUrl = cMapDir;
+      docOptions.cMapPacked = true;
+    }
+
+    if (fs.existsSync(fontDir)) {
+      docOptions.standardFontDataUrl = fontDir;
+    }
+
+    const loadingTask = pdfjs.getDocument(docOptions);
 
     const doc = await loadingTask.promise;
     const pageCount = doc.numPages;
@@ -145,3 +163,4 @@ export async function parsePdfBuffer(buffer: Buffer | Uint8Array): Promise<PdfPa
     };
   }
 }
+

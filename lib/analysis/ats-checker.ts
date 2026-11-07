@@ -194,3 +194,4 @@ export function evaluateATSReadability(resume: ParsedResume): {
     diagnostics,
   };
 }
+

@@ -657,3 +657,4 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
     </div>
   );
 }
+

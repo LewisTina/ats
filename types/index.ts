@@ -188,3 +188,4 @@ export interface ComparisonReport {
     blockingIssuesCount: number;
   }>;
 }
+

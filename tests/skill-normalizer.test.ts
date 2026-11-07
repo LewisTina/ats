@@ -76,3 +76,4 @@ describe("Skill Normalizer & Anti-False Positives", () => {
     expect(skills).not.toContain("Flutter");
   });
 });
+

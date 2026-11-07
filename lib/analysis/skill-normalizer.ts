@@ -389,3 +389,4 @@ export function isSkillPresentInText(
 
   return { present: false };
 }
+

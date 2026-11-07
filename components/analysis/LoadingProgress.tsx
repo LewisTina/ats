@@ -80,3 +80,4 @@ export function LoadingProgress({ currentStage }: LoadingProgressProps) {
     </div>
   );
 }
+
