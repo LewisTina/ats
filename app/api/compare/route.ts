@@ -4,7 +4,7 @@ import { runSmartOrFastAnalysis } from "@/lib/analysis/smart-analyzer";
 import { compareResumeAnalyses } from "@/lib/analysis/comparator";
 import type { ParsedResume, ComparisonCandidate } from "@/types";
 
-export const maxDuration = 90;
+export const maxDuration = 600;
 
 const CompareBodySchema = z.object({
   resumes: z.array(

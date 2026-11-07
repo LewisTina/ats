@@ -3,7 +3,7 @@ import { z } from "zod";
 import { runSmartOrFastAnalysis } from "@/lib/analysis/smart-analyzer";
 import type { ParsedResume } from "@/types";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const RequestBodySchema = z.object({
   resume: z.custom<ParsedResume>((val) => val && typeof val === "object"),

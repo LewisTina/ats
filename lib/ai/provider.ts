@@ -11,8 +11,25 @@ export interface AIProvider {
   analyze(
     resumeText: string,
     jobText: string,
-    targetPosition: TargetPosition,
+    targetPosition: TargetPosition
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }>;
+}
+
+export function extractJsonFromContent(content: string): string {
+  // 1. Remove thinking blocks like <think>...</think> from reasoning models
+  let clean = content.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+
+  // 2. Remove markdown code fences if present
+  clean = clean.replace(/```(?:json)?\s*([\s\S]*?)\s*```/i, "$1").trim();
+
+  // 3. Find outermost JSON object
+  const firstBrace = clean.indexOf("{");
+  const lastBrace = clean.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    clean = clean.substring(firstBrace, lastBrace + 1);
+  }
+
+  return clean;
 }
 
 export class ConfigurableLLMProvider implements AIProvider {
@@ -25,9 +42,7 @@ export class ConfigurableLLMProvider implements AIProvider {
   constructor() {
     this.providerType = (process.env.AI_PROVIDER || "openai").toLowerCase();
     this.apiKey = process.env.AI_API_KEY;
-    this.model =
-      process.env.AI_MODEL ||
-      (this.providerType === "ollama" ? "llama3" : "gpt-4o-mini");
+    this.model = process.env.AI_MODEL || (this.providerType === "ollama" ? "llama3" : "gpt-4o-mini");
 
     if (process.env.AI_BASE_URL) {
       this.baseUrl = process.env.AI_BASE_URL;
@@ -37,8 +52,7 @@ export class ConfigurableLLMProvider implements AIProvider {
           this.baseUrl = "https://openrouter.ai/api/v1";
           break;
         case "gemini":
-          this.baseUrl =
-            "https://generativelanguage.googleapis.com/v1beta/openai";
+          this.baseUrl = "https://generativelanguage.googleapis.com/v1beta/openai";
           break;
         case "groq":
           this.baseUrl = "https://api.groq.com/openai/v1";
@@ -66,20 +80,16 @@ export class ConfigurableLLMProvider implements AIProvider {
   async analyze(
     resumeText: string,
     jobText: string,
-    targetPosition: TargetPosition,
+    targetPosition: TargetPosition
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }> {
     if (!this.isConfigured()) {
       return {
         success: false,
-        error: `Le fournisseur IA "${this.providerType}" nécessite une variable d'environnement AI_API_KEY configurée dans votre fichier .env.local (ou utilisez Ollama en local).`,
+        error: `Le fournisseur IA "${this.providerType}" nécessite une variable d'environnement AI_API_KEY configurée dans votre fichier .env (ou utilisez Ollama en local).`,
       };
     }
 
-    const { systemPrompt, userPrompt } = buildAIPrompt(
-      resumeText,
-      jobText,
-      targetPosition,
-    );
+    const { systemPrompt, userPrompt } = buildAIPrompt(resumeText, jobText, targetPosition);
     const endpoint = `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
 
     const headers: Record<string, string> = {
@@ -97,7 +107,7 @@ export class ConfigurableLLMProvider implements AIProvider {
 
     const bodyPayload = {
       model: this.model,
-      temperature: 0.2,
+      temperature: 0.1,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },
@@ -106,8 +116,10 @@ export class ConfigurableLLMProvider implements AIProvider {
     };
 
     try {
+      // Allow up to 5 minutes for local models (Ollama), 2 minutes for cloud APIs
+      const timeoutMs = this.providerType === "ollama" ? 300000 : 120000;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -136,19 +148,27 @@ export class ConfigurableLLMProvider implements AIProvider {
         };
       }
 
-      // Clean potential markdown blocks
-      const cleanJsonString = content
-        .replace(/^```json\s*/i, "")
-        .replace(/```\s*$/, "")
-        .trim();
+      const cleanJsonString = extractJsonFromContent(content);
 
-      const parsed = JSON.parse(cleanJsonString);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(cleanJsonString);
+      } catch (parseErr) {
+        return {
+          success: false,
+          error: `JSON malformé retourné par le LLM (${parseErr instanceof Error ? parseErr.message : "Erreur de syntaxe"}). Contenu brut : ${content.slice(0, 200)}…`,
+        };
+      }
+
       const validation = AIAnalysisResponseSchema.safeParse(parsed);
 
       if (!validation.success) {
+        const issueDetails = validation.error.issues
+          .map((i) => `${i.path.join(".") || "racine"}: ${i.message}`)
+          .join(", ");
         return {
           success: false,
-          error: `Format de réponse IA invalide : ${validation.error.issues.map((i) => i.message).join(", ")}`,
+          error: `Format de réponse IA invalide (${issueDetails})`,
         };
       }
 
@@ -161,8 +181,7 @@ export class ConfigurableLLMProvider implements AIProvider {
         if (err.name === "AbortError") {
           return {
             success: false,
-            error:
-              "Délai d'attente dépassé (timeout 45s) lors de l'appel au fournisseur IA.",
+            error: "Délai d'attente dépassé lors de l'appel au fournisseur IA.",
           };
         }
         return {

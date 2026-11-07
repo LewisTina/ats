@@ -3,6 +3,7 @@ import {
   buildAIPrompt,
   AIAnalysisResponseSchema,
 } from "@/lib/ai/prompts";
+import { extractJsonFromContent } from "@/lib/ai/provider";
 
 describe("AI Prompt & Schema Validation", () => {
   it("generates system and user prompts preventing hallucinations and enforcing JSON output", () => {
@@ -18,45 +19,78 @@ describe("AI Prompt & Schema Validation", () => {
     expect(userPrompt).toContain("FULLSTACK");
   });
 
-  it("validates well-formed structured AI response JSON with Zod", () => {
-    const validAiResponse = {
-      jobTitle: "Développeur Full-Stack",
-      requirementsEvaluations: [
+  it("extracts pure JSON from content with reasoning <think> blocks and code fences", () => {
+    const rawWithThinking = `
+      <think>
+        Analyzing candidate Pierre Lewis Tina...
+        Skills match React and Next.js.
+      </think>
+      \`\`\`json
+      {
+        "jobTitle": "Développeur Full-Stack",
+        "requirementsEvaluations": [
+          { "label": "React", "status": "confirmed" }
+        ]
+      }
+      \`\`\`
+    `;
+
+    const extracted = extractJsonFromContent(rawWithThinking);
+    const parsed = JSON.parse(extracted);
+
+    expect(parsed.jobTitle).toBe("Développeur Full-Stack");
+    expect(parsed.requirementsEvaluations).toHaveLength(1);
+  });
+
+  it("gracefully validates partial Ollama JSON without throwing 'Required, Required'", () => {
+    // Simulates Ollama output that omits blockingAlerts, priorityActions, and uses French aliases
+    const ollamaResponse = {
+      intitule: "Développeur Full Stack",
+      requirements: [
         {
-          label: "TypeScript",
-          status: "confirmed",
-          proof: "3 ans sur TypeScript chez Acme Corp",
-          explanation: "Compétence démontrée en environnement de production",
-          confidence: "high",
-          required: true,
+          skill: "React",
+          statut: "confirmé",
+          preuve: "React et Next.js dans plusieurs projets",
+          justification: "Compétence avérée",
+          confiance: "haute",
+          obligatoire: "oui",
         },
         {
-          label: "Kubernetes",
-          status: "missing",
-          explanation: "Aucune trace de conteneurs K8s dans le texte",
-          confidence: "high",
-          required: false,
+          skill: "Node.js",
+          statut: "confirmé",
+          confiance: "haute",
         },
       ],
-      contextualRecommendations: [
+      recommendations: [
         {
-          title: "Valoriser l'expérience API",
-          issue: "Les endpoints ne sont pas détaillés",
-          relevanceToJob: "L'offre recherche de la conception REST",
-          suggestion: "Préciser la volumétrie des requêtes traitées",
-          priority: "medium",
+          titre: "Détailler les tests",
+          probleme: "Peu de détails sur les tests",
+          pertinence: "Requis pour la CI",
+          action: "Ajouter Vitest",
+          priorite: "haute",
         },
       ],
-      executiveSummary: {
-        strengths: ["Excellente maîtrise Front & Back"],
-        majorGaps: ["Pas de K8s"],
-        blockingAlerts: [],
-        priorityActions: ["Détailler l'architecture API"],
+      synthese: {
+        pointsForts: ["Excellente maîtrise React et Node.js"],
+        ecarts: ["Pas de Kubernetes"],
+        // Notice: blockingAlerts and priorityActions are omitted!
       },
     };
 
-    const parsed = AIAnalysisResponseSchema.safeParse(validAiResponse);
-    expect(parsed.success).toBe(true);
+    const validation = AIAnalysisResponseSchema.safeParse(ollamaResponse);
+
+    expect(validation.success).toBe(true);
+    if (validation.success) {
+      expect(validation.data.jobTitle).toBe("Développeur Full Stack");
+      expect(validation.data.requirementsEvaluations).toHaveLength(2);
+      expect(validation.data.requirementsEvaluations[0].status).toBe("confirmed");
+      expect(validation.data.requirementsEvaluations[0].confidence).toBe("high");
+      expect(validation.data.requirementsEvaluations[0].required).toBe(true);
+
+      // Defaulted arrays must not crash
+      expect(validation.data.executiveSummary.blockingAlerts).toEqual([]);
+      expect(validation.data.executiveSummary.priorityActions).toEqual([]);
+    }
   });
 
   it("rejects invalid structured AI responses (e.g. invalid status enum)", () => {
@@ -64,8 +98,7 @@ describe("AI Prompt & Schema Validation", () => {
       requirementsEvaluations: [
         {
           label: "React",
-          status: "maybe", // Invalid enum! Must be confirmed, partial, or missing
-          explanation: "Test",
+          status: "inconnu_ou_invalide", // Unrecognized status!
           confidence: "high",
           required: true,
         },
@@ -83,4 +116,3 @@ describe("AI Prompt & Schema Validation", () => {
     expect(parsed.success).toBe(false);
   });
 });
-
