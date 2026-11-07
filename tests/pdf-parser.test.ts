@@ -98,3 +98,4 @@ startxref
     expect(parsedResume.isScannedOrEmpty).toBe(false);
   });
 });
+
