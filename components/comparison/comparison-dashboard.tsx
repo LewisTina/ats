@@ -19,9 +19,9 @@ import type {
   SingleAnalysisResult,
   AnalysisMode,
 } from "@/types";
-import { FileUploadCard } from "@/components/upload/FileUploadCard";
-import { JobCard } from "@/components/job-description/JobCard";
-import { ResultsDashboard } from "@/components/analysis/ResultsDashboard";
+import { FileUploadCard } from "@/components/upload/file-upload-card";
+import { JobCard } from "@/components/job-description/job-card";
+import { ResultsDashboard } from "@/components/analysis/results-dashboard";
 
 interface MultiCVItem {
   id: string;

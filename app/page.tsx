@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Header } from "@/components/layout/Header";
-import { FileUploadCard } from "@/components/upload/FileUploadCard";
-import { JobCard } from "@/components/job-description/JobCard";
-import { AnalysisOptions } from "@/components/analysis/AnalysisOptions";
-import { LoadingProgress } from "@/components/analysis/LoadingProgress";
-import { ResultsDashboard } from "@/components/analysis/ResultsDashboard";
-import { ComparisonDashboard } from "@/components/comparison/ComparisonDashboard";
-import { HistoryModal } from "@/components/history/HistoryModal";
+import { Header } from "@/components/layout/header";
+import { FileUploadCard } from "@/components/upload/file-upload-card";
+import { JobCard } from "@/components/job-description/job-card";
+import { AnalysisOptions } from "@/components/analysis/analysis-options";
+import { LoadingProgress } from "@/components/analysis/loading-progress";
+import { ResultsDashboard } from "@/components/analysis/results-dashboard";
+import { ComparisonDashboard } from "@/components/comparison/comparison-dashboard";
+import { HistoryModal } from "@/components/history/history-modal";
 import type {
   ParsedResume,
   SingleAnalysisResult,
