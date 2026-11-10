@@ -14,6 +14,7 @@ import {
 import type { ParsedResume } from "@/types";
 import { formatFileSize } from "@/lib/utils";
 import Panel from "../blocks/panel";
+import clsx from "clsx";
 
 interface FileUploadCardProps {
   label?: string;
@@ -32,7 +33,7 @@ export function FileUploadCard({
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isTextExpanded, setIsTextExpanded] = useState(false);
+  const [isTextExpanded, setIsTextExpanded] = useState(true);
 
   const handleFileProcess = async (file: File) => {
     setErrorMessage(null);
@@ -90,6 +91,8 @@ export function FileUploadCard({
       icon={"FileText"}
       indication={"PDF ou DOCX (max 10 Mo)"}
       title={label}
+      className="h-fit md:h-full min-h-0 overflow-hidden"
+      contentClassName="min-h-0 overflow-hidden"
     >
       {!parsedResume ? (
         <div
@@ -100,7 +103,7 @@ export function FileUploadCard({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`group relative flex min-h-[220px] flex-1 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-all ${
+          className={`group relative flex min-h-0 flex-1 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-all ${
             isDragging
               ? "border-accent bg-accent/5 scale-[0.99]"
               : "border-border hover:border-foreground/40 hover:bg-surface-muted/50"
@@ -145,7 +148,7 @@ export function FileUploadCard({
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3 flex-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
           {/* File Card Info */}
           <div className="flex items-center justify-between rounded-lg border border-border bg-surface-muted/40 p-3.5">
             <div className="flex items-center gap-3 overflow-hidden">
@@ -207,11 +210,16 @@ export function FileUploadCard({
           )}
 
           {/* Collapsible Extracted Text Preview */}
-          <div className="rounded-lg border border-border overflow-hidden">
+          <div
+            className={clsx(
+              "flex min-h-0 flex-col rounded-lg border border-border overflow-hidden",
+              isTextExpanded && "flex-1",
+            )}
+          >
             <button
               type="button"
               onClick={() => setIsTextExpanded(!isTextExpanded)}
-              className="flex w-full items-center justify-between bg-surface-muted/30 px-3 py-2 text-xs font-medium text-foreground/80 hover:bg-surface-muted transition-colors"
+              className="flex w-full shrink-0 items-center justify-between bg-surface-muted/30 px-3 py-2 text-xs font-medium text-foreground/80 hover:bg-surface-muted transition-colors"
             >
               <span>
                 Aperçu du texte extrait ({parsedResume.rawText.length}{" "}
@@ -225,7 +233,7 @@ export function FileUploadCard({
             </button>
 
             {isTextExpanded && (
-              <div className="max-h-60 overflow-y-auto bg-surface p-3 font-mono text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap select-text border-t border-border">
+              <div className="min-h-0 max-h-60 md:max-h-[unset] flex-1 overflow-y-auto bg-surface p-3 font-mono text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap select-text border-t border-border">
                 {parsedResume.rawText || "(Aucun texte détecté)"}
               </div>
             )}
@@ -234,7 +242,7 @@ export function FileUploadCard({
       )}
 
       {errorMessage && (
-        <div className="mt-3 flex items-center gap-2 rounded-md bg-rose-500/10 p-2.5 text-xs font-medium text-rose-600 dark:text-rose-400 border border-rose-500/20">
+        <div className="mt-3 flex shrink-0 items-center gap-2 rounded-md bg-rose-500/10 p-2.5 text-xs font-medium text-rose-600 dark:text-rose-400 border border-rose-500/20">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>

@@ -78,6 +78,7 @@ export default function HomePage() {
     parsedResume.rawText.length > 30 &&
     jobDescription.trim().length >= 20,
   );
+  const isInputView = activeTab === "single" && !currentResult;
 
   const handleStartAnalysis = async () => {
     if (!canAnalyze || !parsedResume) return;
@@ -121,7 +122,11 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground pb-20 md:pb-0">
+    <div
+      className={`flex flex-col bg-background text-foreground pb-20 md:pb-0 ${
+        isInputView ? "h-fit md:h-dvh md:overflow-hidden" : "min-h-screen"
+      }`}
+    >
       {/* Header */}
       <Header
         activeTab={activeTab}
@@ -134,7 +139,11 @@ export default function HomePage() {
       />
 
       {/* Main Content Area */}
-      <main className="mx-auto w-full flex-1 flex flex-col border-b border-border">
+      <main
+        className={`mx-auto flex w-full flex-1 flex-col border-b border-border ${
+          isInputView ? "min-h-0 overflow-hidden" : ""
+        }`}
+      >
         {activeTab === "compare" ? (
           <ComparisonDashboard />
         ) : currentResult ? (
@@ -146,7 +155,7 @@ export default function HomePage() {
             }}
           />
         ) : (
-          <div className="flex flex-col flex-1 divide-y divide-border">
+          <div className="flex min-h-0 flex-1 flex-col divide-y divide-border">
             {/* Hero / Intro */}
             <Heading
               title={"Analysez votre CV avant de postuler."}
@@ -176,8 +185,8 @@ export default function HomePage() {
             ) : (
               <>
                 {/* Two Main Cards: Resume (Left) + Job Description (Right) */}
-                <div className="flex flex-1 bg-surface">
-                  <div className="w-full mx-auto grid grid-cols-1 md:grid-cols-2 items-start divide-x divide-border max-w-[1584px] border-x border-border">
+                <div className="flex min-h-0 flex-1 overflow-hidden bg-surface">
+                  <div className="mx-auto flex flex-col md:grid min-h-0 w-full max-w-[1584px] flex-1 grid-cols-1 grid-rows-2 divide-x divide-border border-x border-border md:grid-cols-2 md:grid-rows-1">
                     <FileUploadCard
                       label="Votre CV"
                       parsedResume={parsedResume}

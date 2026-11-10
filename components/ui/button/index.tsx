@@ -17,7 +17,7 @@ export type ButtonProps = {
 
 export default function Button(props: ButtonProps) {
   const {
-    theme,
+    theme = "neutral",
     label,
     type,
     isLoading,

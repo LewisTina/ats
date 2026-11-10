@@ -7,11 +7,24 @@ export default function Panel(
     action?: React.ReactNode;
     title: string;
     subtitle?: string;
+    className?: string;
+    contentClassName?: string;
   }>,
 ) {
-  const { icon, indication, title, children, action, subtitle } = props;
+  const {
+    icon,
+    indication,
+    title,
+    children,
+    action,
+    subtitle,
+    className,
+    contentClassName,
+  } = props;
   return (
-    <div className="flex flex-col shadow-xs transition-all self-stretch">
+    <div
+      className={`flex flex-col shadow-xs transition-all self-stretch ${className ?? ""}`}
+    >
       <div className="flex items-center justify-between p-3 sm:p-5 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="flex p-2 items-center justify-center rounded-md bg-surface-muted text-foreground/80">
@@ -37,7 +50,11 @@ export default function Panel(
         </div>
       </div>
 
-      <div className="flex flex-col flex-1 p-3 sm:p-5 relative">{children}</div>
+      <div
+        className={`relative flex flex-1 flex-col p-3 sm:p-5 ${contentClassName ?? ""}`}
+      >
+        {children}
+      </div>
     </div>
   );
 }
