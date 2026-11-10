@@ -90,7 +90,14 @@ export class ConfigurableLLMProvider implements AIProvider {
     }
 
     const { systemPrompt, userPrompt } = buildAIPrompt(resumeText, jobText, context);
-    const endpoint = `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
+    const isOllama = this.providerType === "ollama";
+
+    // For Ollama, use the native /api/chat endpoint so we can explicitly pass options.num_ctx = 16384
+    // (preventing the 4096-token default context shift that truncates JSON) and disable thinking mode.
+    const ollamaOrigin = this.baseUrl.replace(/\/v1\/?$/, "").replace(/\/+$/, "");
+    const endpoint = isOllama
+      ? `${ollamaOrigin}/api/chat`
+      : `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -105,19 +112,37 @@ export class ConfigurableLLMProvider implements AIProvider {
       headers["X-Title"] = "CV Analyzer Local";
     }
 
-    const bodyPayload = {
-      model: this.model,
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-    };
+    const isThinkingModel = /qwen3|deepseek-r1|qwq/i.test(this.model);
+
+    const bodyPayload = isOllama
+      ? {
+          model: this.model,
+          stream: false,
+          format: "json",
+          ...(isThinkingModel ? { think: false } : {}),
+          options: {
+            temperature: 0.1,
+            num_ctx: 16384,
+            num_predict: 4096,
+          },
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }
+      : {
+          model: this.model,
+          temperature: 0.1,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        };
 
     try {
       // Allow up to 5 minutes for local models (Ollama), 2 minutes for cloud APIs
-      const timeoutMs = this.providerType === "ollama" ? 300000 : 120000;
+      const timeoutMs = isOllama ? 300000 : 120000;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -139,7 +164,8 @@ export class ConfigurableLLMProvider implements AIProvider {
       }
 
       const jsonResponse = await res.json();
-      const content = jsonResponse.choices?.[0]?.message?.content;
+      const content =
+        jsonResponse.message?.content ?? jsonResponse.choices?.[0]?.message?.content;
 
       if (!content || typeof content !== "string") {
         return {

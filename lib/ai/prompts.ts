@@ -147,25 +147,32 @@ export const AIAnalysisResponseSchema = z.preprocess(
     // Normalize requirements array from aliases
     const rawReqs =
       obj.requirementsEvaluations ||
+      obj.requirements_evaluations ||
       obj.requirements ||
+      obj.evaluations ||
+      obj.exigences ||
       obj.competences ||
-      obj.skills;
+      obj.skills ||
+      obj.criteria ||
+      obj.criteres ||
+      obj.matching ||
+      [];
 
     const requirementsEvaluations = Array.isArray(rawReqs)
       ? rawReqs.map((item) => {
-          if (!item || typeof item !== "object") return { label: String(item) };
+          if (!item || typeof item !== "object") return { label: String(item), status: "partial" };
           const it = item as Record<string, unknown>;
           return {
-            label: it.label || it.name || it.skill || it.titre || "Compétence",
+            label: it.label || it.name || it.skill || it.titre || it.exigence || "Compétence",
             category: it.category || it.categorie || it.type,
-            status: it.status || it.statut,
+            status: it.status || it.statut || "partial",
             proof: it.proof || it.preuve || it.snippet || "",
             explanation: it.explanation || it.justification || it.comment || it.raison || "",
             confidence: it.confidence || it.confiance || "medium",
             required: it.required !== undefined ? it.required : (it.obligatoire !== undefined ? it.obligatoire : false),
           };
         })
-      : rawReqs;
+      : [];
 
     // Normalize recommendations from aliases
     const rawRecs =
@@ -219,7 +226,7 @@ export const AIAnalysisResponseSchema = z.preprocess(
   },
   z.object({
     jobTitle: z.string().optional(),
-    requirementsEvaluations: z.array(AIRequirementSchema),
+    requirementsEvaluations: z.array(AIRequirementSchema).default([]),
     contextualRecommendations: z.array(AIRecommendationSchema).default([]),
     executiveSummary: AIExecutiveSummarySchema.default({
       strengths: [],

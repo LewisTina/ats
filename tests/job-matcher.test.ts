@@ -191,5 +191,60 @@ describe("Job Requirement Analysis & Deterministic Matching", () => {
     expect(expMatch?.status).toBe("confirmed");
     expect(expMatch?.comment).toContain("5 à 7 ans");
   });
+
+  it("extracts full 6-year span from French month-year intervals ('Septembre 2020 – Janvier 2022', 'Décembre 2023 – Septembre 2026')", () => {
+    const resumeWithMonths: ParsedResume = {
+      rawText: `
+        PROFIL
+        Développeur web depuis 2020, en entreprise et en freelance.
+        EXPÉRIENCES PROFESSIONNELLES
+        Développeur Full Stack Web et Mobile - CPG Consulting
+        Décembre 2023 – Septembre 2026
+        Développeur web et mobile freelance
+        Depuis 2022
+        Développeur web & Graphic Designer - Pro Deco
+        Septembre 2020 – Janvier 2022
+      `,
+      fileName: "cv.pdf",
+      fileType: "pdf",
+      fileSizeBytes: 15000,
+      pageCount: 1,
+      sections: [
+        {
+          title: "PROFIL",
+          category: "summary",
+          content: "Développeur web depuis 2020, en entreprise et en freelance.",
+          confidence: 0.95,
+        },
+        {
+          title: "EXPÉRIENCES PROFESSIONNELLES",
+          category: "experience",
+          content: `
+            Développeur Full Stack Web et Mobile - CPG Consulting
+            Décembre 2023 – Septembre 2026
+            Développeur web et mobile freelance
+            Depuis 2022
+            Développeur web & Graphic Designer - Pro Deco
+            Septembre 2020 – Janvier 2022
+          `,
+          confidence: 0.95,
+        },
+      ],
+      detectedSkills: ["React", "TypeScript"],
+      contactInfo: {
+        hasEmail: true,
+        hasPhone: true,
+        hasLocation: true,
+        hasLinkedIn: false,
+        hasGitHub: false,
+      },
+      extractionWarnings: [],
+      isScannedOrEmpty: false,
+    };
+
+    const est = estimateCandidateExperience(resumeWithMonths);
+    expect(est.years).toBe(6);
+    expect(est.proof).toContain("2020 à 2026");
+  });
 });
 

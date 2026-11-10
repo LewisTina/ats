@@ -150,10 +150,19 @@ export function estimateCandidateExperience(
       : rawText;
 
   const nowYear = new Date().getFullYear();
-  // Collect explicit date intervals like "2019 - 2024", "2020 - Présent", "depuis 2018"
-  const intervalRegex =
-    /\b(19[89]\d|20[0-3]\d)\s*(?:[-–—/]|à|to|jusqu['’][àa])\s*(19[89]\d|20[0-3]\d|aujourd['’]hui|pr[ée]sent|present|actuel(?:lement)?|current|now|en\s+cours)\b/gi;
-  const sinceRegex = /\b(?:depuis|since)\s+(?:[a-zéû]+\s+)?(19[89]\d|20[0-3]\d)\b/gi;
+  const monthToken =
+    "(?:jan(?:v(?:ier)?)?|f[ée]v(?:r(?:ier)?)?|feb(?:ruary)?|mars?|mar(?:ch)?|avr(?:il)?|apr(?:il)?|mai|may|juin|jun(?:e)?|juil(?:let)?|jul(?:y)?|ao[ûu]t|aug(?:ust)?|sep(?:t(?:embre|ember)?)?|oct(?:obre|ober)?|nov(?:embre|ember)?|d[ée]c(?:embre|ember)?|0?[1-9]|1[0-2])";
+
+  // Collect explicit date intervals like "2019 - 2024", "Septembre 2020 – Janvier 2022", "09/2020 - 01/2022", "Déc. 2023 - Présent"
+  const intervalRegex = new RegExp(
+    `(?:\\b${monthToken}[\\s./-]*)*\\b(19[89]\\d|20[0-3]\\d)\\s*(?:[-–—/]|\\b[àa]\\b|\\bto\\b|jusqu['’][àa])\\s*(?:${monthToken}[\\s./-]*)*(19[89]\\d|20[0-3]\\d|aujourd['’]hui|pr[ée]sent|present|actuel(?:lement)?|current|now|en\\s+cours)\\b`,
+    "gi"
+  );
+  // Also support "depuis 2020", "depuis septembre 2020", "since 2021" across full resume text (including PROFILE summary like "Développeur web depuis 2020")
+  const sinceRegex = new RegExp(
+    `\\b(?:depuis|since)\\s+(?:${monthToken}[\\s./-]*)*(19[89]\\d|20[0-3]\\d)\\b`,
+    "gi"
+  );
 
   const intervals: Array<{ start: number; end: number }> = [];
   const allFoundYears = Array.from(rawText.matchAll(/\b(19[89]\d|20[0-3]\d)\b/g)).map((m) =>
@@ -172,7 +181,7 @@ export function estimateCandidateExperience(
     }
   }
 
-  for (const m of textForDates.matchAll(sinceRegex)) {
+  for (const m of rawText.matchAll(sinceRegex)) {
     const start = parseInt(m[1], 10);
     if (start >= 1985 && referenceCurrentYear >= start && referenceCurrentYear - start <= 40) {
       intervals.push({ start, end: referenceCurrentYear });

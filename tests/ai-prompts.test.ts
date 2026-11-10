@@ -129,4 +129,30 @@ describe("AI Prompt & Schema Validation", () => {
     const parsed = AIAnalysisResponseSchema.safeParse(invalidAiResponse);
     expect(parsed.success).toBe(false);
   });
+
+  it("does not fail with 'requirementsEvaluations: Required' when LLM omits or renames requirements array", () => {
+    const partialOrRenamed = {
+      jobTitle: "Senior Software Engineer",
+      evaluations: [
+        {
+          exigence: "TypeScript",
+          statut: "confirmed",
+        },
+      ],
+    };
+
+    const parsed = AIAnalysisResponseSchema.safeParse(partialOrRenamed);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.requirementsEvaluations).toHaveLength(1);
+      expect(parsed.data.requirementsEvaluations[0].label).toBe("TypeScript");
+    }
+
+    const emptyRoot = { jobTitle: "Senior Software Engineer" };
+    const parsedEmpty = AIAnalysisResponseSchema.safeParse(emptyRoot);
+    expect(parsedEmpty.success).toBe(true);
+    if (parsedEmpty.success) {
+      expect(parsedEmpty.data.requirementsEvaluations).toEqual([]);
+    }
+  });
 });
