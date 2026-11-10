@@ -121,7 +121,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground pb-20 md:pb-0">
       {/* Header */}
       <Header
         activeTab={activeTab}
@@ -134,7 +134,7 @@ export default function HomePage() {
       />
 
       {/* Main Content Area */}
-      <main className="mx-auto w-full flex-1 flex flex-col">
+      <main className="mx-auto w-full flex-1 flex flex-col border-b border-border">
         {activeTab === "compare" ? (
           <ComparisonDashboard />
         ) : currentResult ? (
@@ -163,6 +163,11 @@ export default function HomePage() {
                   disabled={!canAnalyze || isLoading}
                 />
               }
+            />
+            {/* Analysis Options and Trigger */}
+            <AnalysisOptions
+              analysisMode={analysisMode}
+              onModeChange={setAnalysisMode}
             />
 
             {/* Loading Progression State */}
@@ -193,11 +198,6 @@ export default function HomePage() {
                     />
                   </div>
                 </div>
-                {/* Analysis Options and Trigger */}
-                <AnalysisOptions
-                  analysisMode={analysisMode}
-                  onModeChange={setAnalysisMode}
-                />
               </>
             )}
           </div>

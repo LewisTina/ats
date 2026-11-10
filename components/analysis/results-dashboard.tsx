@@ -55,7 +55,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
   return (
     <div className="flex flex-col gap-8">
       {/* Top Bar with Job & CV identity */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-border bg-surface p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-border bg-surface p-3 sm:p-5 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
             <span className="rounded bg-surface-muted px-2 py-0.5 text-sm font-semibold text-foreground/70 uppercase tracking-wider">
@@ -389,7 +389,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
                         {skill.comment}
                       </p>
                       {skill.proof && (
-                        <p className="mt-1 font-mono text-[10px] text-foreground/60 italic">
+                        <p className="mt-1 font-mono text-xs text-foreground/60 italic">
                           Extrait : {skill.proof}
                         </p>
                       )}
@@ -421,7 +421,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
                         </span>
                       </div>
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                        className={`text-xs px-1.5 py-0.5 rounded font-medium ${
                           skill.required
                             ? "bg-rose-500/10 text-rose-600"
                             : "bg-surface-muted text-foreground/60"
@@ -474,7 +474,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
                   </td>
                   <td className="py-3 px-3">
                     <span
-                      className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold ${
+                      className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${
                         req.required
                           ? "bg-foreground/10 text-foreground"
                           : "bg-surface-muted text-foreground/60"
@@ -514,7 +514,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
                       {req.comment}
                     </p>
                     {req.proofInResume && (
-                      <p className="mt-1 font-mono text-[10px] text-foreground/50 italic bg-surface-muted/50 p-1 rounded">
+                      <p className="mt-1 font-mono text-xs text-foreground/50 italic bg-surface-muted/50 p-1 rounded">
                         {req.proofInResume}
                       </p>
                     )}
@@ -565,7 +565,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
                     {diag.title}
                   </span>
                   <span
-                    className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    className={`rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
                       diag.severity === "high"
                         ? "bg-rose-500/10 text-rose-600"
                         : diag.severity === "medium"
@@ -615,7 +615,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
                   {rec.title}
                 </h4>
                 <span
-                  className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  className={`rounded px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${
                     rec.priority === "high"
                       ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
                       : rec.priority === "medium"

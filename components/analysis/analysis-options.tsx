@@ -14,20 +14,20 @@ export function AnalysisOptions({
   onModeChange,
 }: AnalysisOptionsProps) {
   return (
-    <div className="flex flex-col px-4 sm:px-6 py-4 gap-4 bg-surface">
+    <div className="flex bg-surface">
       {/* Mode d'analyse */}
-      <div className="space-y-2.5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground tracking-tight">
-          <Cpu className="h-4 w-4 text-accent" />
+      <div className="w-full max-w-[1584px] border-x border-border p-3 sm:p-5 mx-auto flex flex-col sm:flex-row justify-between gap-2 md:gap-8">
+        <div className="flex items-center gap-1.5 text-base font-semibold text-foreground tracking-tight">
+          <Cpu className="h-6 w-6 text-accent" />
           <span>Moteur d'analyse</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-1">
           {/* Mode Rapide */}
           <button
             type="button"
             onClick={() => onModeChange("fast")}
-            className={`flex flex-col items-start rounded-lg border p-2.5 text-left transition-all ${
+            className={`flex flex-col items-start rounded-l-2xl rounded-r-md px-4 py-2 border text-left transition-all ${
               analysisMode === "fast"
                 ? "border-accent bg-accent/5 ring-1 ring-accent"
                 : "border-border bg-background hover:bg-surface-muted"
@@ -42,14 +42,14 @@ export function AnalysisOptions({
                 }`}
               />
               <span
-                className={`text-xs font-semibold ${
+                className={`text-sm font-semibold ${
                   analysisMode === "fast" ? "text-accent" : "text-foreground"
                 }`}
               >
                 Rapide (Local)
               </span>
             </div>
-            <span className="text-[10px] text-foreground/50 mt-1">
+            <span className="text-xs text-foreground/50 hidden sm:block">
               Analyse déterministe hors-ligne. Aucune clé API requise.
             </span>
           </button>
@@ -58,7 +58,7 @@ export function AnalysisOptions({
           <button
             type="button"
             onClick={() => onModeChange("smart")}
-            className={`flex flex-col items-start rounded-lg border p-2.5 text-left transition-all ${
+            className={`flex flex-col items-start rounded-l-md rounded-r-2xl  px-4 py-2 border text-left transition-all ${
               analysisMode === "smart"
                 ? "border-accent bg-accent/5 ring-1 ring-accent"
                 : "border-border bg-background hover:bg-surface-muted"
@@ -73,14 +73,14 @@ export function AnalysisOptions({
                 }`}
               />
               <span
-                className={`text-xs font-semibold ${
+                className={`text-sm font-semibold ${
                   analysisMode === "smart" ? "text-accent" : "text-foreground"
                 }`}
               >
                 Intelligent (LLM)
               </span>
             </div>
-            <span className="text-[10px] text-foreground/50 mt-1">
+            <span className="text-xs text-foreground/50 hidden sm:block">
               Analyse déterministe enrichie par compréhension sémantique.
             </span>
           </button>

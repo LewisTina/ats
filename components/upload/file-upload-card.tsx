@@ -145,7 +145,7 @@ export function FileUploadCard({
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 flex-1">
           {/* File Card Info */}
           <div className="flex items-center justify-between rounded-lg border border-border bg-surface-muted/40 p-3.5">
             <div className="flex items-center gap-3 overflow-hidden">

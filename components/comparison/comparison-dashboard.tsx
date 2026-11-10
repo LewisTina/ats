@@ -246,7 +246,7 @@ export function ComparisonDashboard() {
       {report && (
         <div className="space-y-6 pt-6 border-t border-border">
           {/* Recommendation Banner */}
-          <div className="flex items-start gap-4 rounded-xl border border-accent/30 bg-accent/5 p-5 text-foreground shadow-xs">
+          <div className="flex items-start gap-4 rounded-xl border border-accent/30 bg-accent/5 p-3 sm:p-5 text-foreground shadow-xs">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground shadow-xs">
               <Award className="h-5 w-5" />
             </div>
@@ -302,12 +302,12 @@ export function ComparisonDashboard() {
                           <div className="flex items-center gap-2">
                             <span>{cand.label}</span>
                             {isWinner && (
-                              <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-foreground">
+                              <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-bold text-accent-foreground">
                                 Recommandé
                               </span>
                             )}
                           </div>
-                          <p className="text-[10px] text-foreground/50 mt-0.5 font-normal">
+                          <p className="text-xs text-foreground/50 mt-0.5 font-normal">
                             {cand.fileName}
                           </p>
                         </td>

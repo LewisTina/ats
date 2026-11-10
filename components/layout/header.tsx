@@ -9,7 +9,6 @@ import {
   Sparkles,
   Layers,
   CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -56,24 +55,24 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/80 backdrop-blur-md">
-      <div className="mx-auto flex p-4 sm:px-6 max-w-[1584px] border-x border-border items-center justify-between">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/80 backdrop-blur-md overflow-hidden">
+      <div className="mx-auto flex gap-2 p-4 sm:px-6 max-w-[1584px] border-x border-border items-center justify-between">
         {/* Left: Branding */}
-        <div className="flex items-center gap-3">
+        <div className="items-center gap-3 hidden sm:flex">
           <div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-foreground tracking-tight">
                 CV Analyzer
               </span>
             </div>
-            <p className="text-xs text-foreground/60 hidden sm:block">
+            <p className="text-xs text-foreground/60 hidden lg:block">
               Analyse locale de candidatures & ATS
             </p>
           </div>
         </div>
 
         {/* Center: Mode Switcher */}
-        <div className="flex items-center rounded-lg border border-border bg-surface p-1 shadow-xs">
+        <div className="flex items-center rounded-lg border border-border bg-surface p-0.5 shadow-xs">
           <button
             type="button"
             onClick={() => onTabChange("single")}
@@ -84,7 +83,9 @@ export function Header({
             }`}
           >
             <FileText className="h-3.5 w-3.5" />
-            <span>Analyse</span>
+            <span className="truncate overflow-hidden text-ellipsis inline-block">
+              Analyse
+            </span>
           </button>
           <button
             type="button"
@@ -96,7 +97,9 @@ export function Header({
             }`}
           >
             <Layers className="h-3.5 w-3.5" />
-            <span>Comparatif Multi-CV</span>
+            <span className="truncate overflow-hidden text-ellipsis inline-block">
+              Comparatif Multi-CV
+            </span>
           </button>
         </div>
 
@@ -140,7 +143,7 @@ export function Header({
             <History className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Historique</span>
             {historyCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-[10px] font-bold text-background">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">
                 {historyCount}
               </span>
             )}

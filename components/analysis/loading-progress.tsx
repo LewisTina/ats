@@ -62,7 +62,7 @@ export function LoadingProgress({ currentStage }: LoadingProgressProps) {
               }`}
             >
               <div
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] ${
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-xs ${
                   isDone
                     ? "bg-emerald-500 text-white"
                     : isCurrent
