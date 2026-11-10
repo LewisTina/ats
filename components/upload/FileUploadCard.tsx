@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { ParsedResume } from "@/types";
 import { formatFileSize } from "@/lib/utils";
+import Panel from "../layout/panel";
 
 interface FileUploadCardProps {
   label?: string;
@@ -38,7 +39,9 @@ export function FileUploadCard({
 
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (!ext || !["pdf", "docx", "doc"].includes(ext)) {
-      setErrorMessage("Format non supporté. Veuillez importer un fichier PDF ou DOCX.");
+      setErrorMessage(
+        "Format non supporté. Veuillez importer un fichier PDF ou DOCX.",
+      );
       return;
     }
 
@@ -67,7 +70,7 @@ export function FileUploadCard({
       onParsed(data.resume);
     } catch (err) {
       setErrorMessage(
-        err instanceof Error ? err.message : "Impossible de lire le fichier."
+        err instanceof Error ? err.message : "Impossible de lire le fichier.",
       );
     } finally {
       setIsLoading(false);
@@ -83,21 +86,11 @@ export function FileUploadCard({
   };
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-surface p-5 shadow-xs transition-all">
-      <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-surface-muted text-foreground/80">
-            <FileText className="h-4 w-4" />
-          </div>
-          <h2 className="text-sm font-semibold text-foreground tracking-tight">
-            {label}
-          </h2>
-        </div>
-        <span className="text-[11px] text-foreground/50 font-medium">
-          PDF ou DOCX (max 10 Mo)
-        </span>
-      </div>
-
+    <Panel
+      icon={"FileText"}
+      indication={"PDF ou DOCX (max 10 Mo)"}
+      title={label}
+    >
       {!parsedResume ? (
         <div
           onDragOver={(e) => {
@@ -107,7 +100,7 @@ export function FileUploadCard({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`group relative flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-all ${
+          className={`group relative flex min-h-[220px] flex-1 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-all ${
             isDragging
               ? "border-accent bg-accent/5 scale-[0.99]"
               : "border-border hover:border-foreground/40 hover:bg-surface-muted/50"
@@ -139,9 +132,12 @@ export function FileUploadCard({
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-foreground">
-                  Glissez-déposez votre CV ici, ou <span className="text-accent underline">parcourez vos fichiers</span>
+                  Glissez-déposez votre CV ici, ou{" "}
+                  <span className="text-accent underline">
+                    parcourez vos fichiers
+                  </span>
                 </p>
-                <p className="text-[11px] text-foreground/50">
+                <p className="text-sm text-foreground/50">
                   Traitement 100% local sur votre machine
                 </p>
               </div>
@@ -160,9 +156,11 @@ export function FileUploadCard({
                 <p className="truncate text-xs font-medium text-foreground">
                   {parsedResume.fileName}
                 </p>
-                <p className="text-[11px] text-foreground/50">
+                <p className="text-sm text-foreground/50">
                   {formatFileSize(parsedResume.fileSizeBytes)}
-                  {parsedResume.pageCount && parsedResume.pageCount > 0 && ` • ${parsedResume.pageCount} page(s)`}
+                  {parsedResume.pageCount &&
+                    parsedResume.pageCount > 0 &&
+                    ` • ${parsedResume.pageCount} page(s)`}
                   {` • ${parsedResume.rawText.length} caractères extraits`}
                 </p>
               </div>
@@ -198,7 +196,9 @@ export function FileUploadCard({
                   <div className="space-y-0.5">
                     <p className="font-medium">{warn.message}</p>
                     {warn.recommendation && (
-                      <p className="text-[11px] opacity-90">{warn.recommendation}</p>
+                      <p className="text-sm opacity-90">
+                        {warn.recommendation}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -213,7 +213,10 @@ export function FileUploadCard({
               onClick={() => setIsTextExpanded(!isTextExpanded)}
               className="flex w-full items-center justify-between bg-surface-muted/30 px-3 py-2 text-xs font-medium text-foreground/80 hover:bg-surface-muted transition-colors"
             >
-              <span>Aperçu du texte extrait ({parsedResume.rawText.length} caractères)</span>
+              <span>
+                Aperçu du texte extrait ({parsedResume.rawText.length}{" "}
+                caractères)
+              </span>
               {isTextExpanded ? (
                 <ChevronUp className="h-3.5 w-3.5" />
               ) : (
@@ -222,7 +225,7 @@ export function FileUploadCard({
             </button>
 
             {isTextExpanded && (
-              <div className="max-h-60 overflow-y-auto bg-surface p-3 font-mono text-[11px] leading-relaxed text-foreground/80 whitespace-pre-wrap select-text border-t border-border">
+              <div className="max-h-60 overflow-y-auto bg-surface p-3 font-mono text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap select-text border-t border-border">
                 {parsedResume.rawText || "(Aucun texte détecté)"}
               </div>
             )}
@@ -236,7 +239,6 @@ export function FileUploadCard({
           <span>{errorMessage}</span>
         </div>
       )}
-    </div>
+    </Panel>
   );
 }
-

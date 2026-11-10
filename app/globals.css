@@ -3,29 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --background: #FAFAFA;
-  --foreground: #171717;
-  --surface: #FFFFFF;
-  --surface-muted: #F4F4F5;
-  --border: #E5E5E5;
-  --accent: #2563EB;
-  --accent-foreground: #FFFFFF;
+  --background: 250 250 250;
+  --foreground: 23 23 23;
+  --surface: 255 255 255;
+  --surface-muted: 244 244 245;
+  --border: 229 229 229;
+  --accent: 37 99 235;
+  --accent-foreground: 255 255 255;
 }
 
 .dark {
-  --background: #09090B;
-  --foreground: #FAFAFA;
-  --surface: #18181B;
-  --surface-muted: #27272A;
-  --border: #27272A;
-  --accent: #3B82F6;
-  --accent-foreground: #FFFFFF;
+  --background: 9 9 11;
+  --foreground: 250 250 250;
+  --surface: 24 24 27;
+  --surface-muted: 39 39 42;
+  --border: 39 39 42;
+  --accent: 59 130 246;
+  --accent-foreground: 255 255 255;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: rgb(var(--background));
+  color: rgb(var(--foreground));
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -48,4 +50,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.5);
 }
-

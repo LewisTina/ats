@@ -32,7 +32,8 @@ interface MultiCVItem {
 
 export function ComparisonDashboard() {
   const [jobDescription, setJobDescription] = useState("");
-  const [targetPosition, setTargetPosition] = useState<TargetPosition>("general");
+  const [targetPosition, setTargetPosition] =
+    useState<TargetPosition>("general");
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
 
   const [cvList, setCvList] = useState<MultiCVItem[]>([
@@ -42,14 +43,19 @@ export function ComparisonDashboard() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [report, setReport] = useState<ComparisonReport | null>(null);
-  const [selectedResultToView, setSelectedResultToView] = useState<SingleAnalysisResult | null>(null);
+  const [selectedResultToView, setSelectedResultToView] =
+    useState<SingleAnalysisResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const addCvSlot = () => {
     const nextIdx = cvList.length + 1;
     setCvList((prev) => [
       ...prev,
-      { id: `cv-${Date.now()}`, label: `CV Version ${nextIdx}`, parsedResume: null },
+      {
+        id: `cv-${Date.now()}`,
+        label: `CV Version ${nextIdx}`,
+        parsedResume: null,
+      },
     ]);
   };
 
@@ -60,18 +66,25 @@ export function ComparisonDashboard() {
 
   const updateParsedResume = (id: string, resume: ParsedResume) => {
     setCvList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, parsedResume: resume } : item))
+      prev.map((item) =>
+        item.id === id ? { ...item, parsedResume: resume } : item,
+      ),
     );
   };
 
   const updateLabel = (id: string, newLabel: string) => {
     setCvList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, label: newLabel } : item))
+      prev.map((item) =>
+        item.id === id ? { ...item, label: newLabel } : item,
+      ),
     );
   };
 
-  const validResumesCount = cvList.filter((item) => item.parsedResume !== null).length;
-  const canCompare = validResumesCount >= 2 && jobDescription.trim().length >= 20;
+  const validResumesCount = cvList.filter(
+    (item) => item.parsedResume !== null,
+  ).length;
+  const canCompare =
+    validResumesCount >= 2 && jobDescription.trim().length >= 20;
 
   const handleRunComparison = async () => {
     setErrorMessage(null);
@@ -106,7 +119,9 @@ export function ComparisonDashboard() {
       setSelectedResultToView(null);
     } catch (err) {
       setErrorMessage(
-        err instanceof Error ? err.message : "Erreur inattendue de comparaison."
+        err instanceof Error
+          ? err.message
+          : "Erreur inattendue de comparaison.",
       );
     } finally {
       setIsLoading(false);
@@ -139,7 +154,9 @@ export function ComparisonDashboard() {
           Comparateur multi-versions de CV
         </h1>
         <p className="mt-1 text-sm text-foreground/60">
-          Importez vos différentes déclinaisons (Full-Stack, Mobile, Front-End) face à la même offre et découvrez objectivement la version la plus adaptée.
+          Importez vos différentes déclinaisons (Full-Stack, Mobile, Front-End)
+          face à la même offre et découvrez objectivement la version la plus
+          adaptée.
         </p>
       </div>
 
@@ -206,7 +223,9 @@ export function ComparisonDashboard() {
                 onParsed={(res) => updateParsedResume(item.id, res)}
                 onClear={() =>
                   setCvList((prev) =>
-                    prev.map((it) => (it.id === item.id ? { ...it, parsedResume: null } : it))
+                    prev.map((it) =>
+                      it.id === item.id ? { ...it, parsedResume: null } : it,
+                    ),
                   )
                 }
               />
@@ -255,7 +274,7 @@ export function ComparisonDashboard() {
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
+                <span className="text-sm font-bold uppercase tracking-wider text-accent">
                   Recommandation objective
                 </span>
               </div>
@@ -276,7 +295,7 @@ export function ComparisonDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-border bg-surface-muted/50 text-[11px] font-semibold text-foreground/60 uppercase tracking-wider">
+                  <tr className="border-b border-border bg-surface-muted/50 text-sm font-semibold text-foreground/60 uppercase tracking-wider">
                     <th className="py-3 px-4">Version du CV</th>
                     <th className="py-3 px-4">Lisibilité ATS</th>
                     <th className="py-3 px-4">Score Matching</th>
@@ -288,13 +307,17 @@ export function ComparisonDashboard() {
                 <tbody className="divide-y divide-border">
                   {report.candidates.map((cand) => {
                     const isWinner = cand.id === report.recommendedCandidateId;
-                    const highlight = report.comparisonHighlights.find((h) => h.candidateId === cand.id);
+                    const highlight = report.comparisonHighlights.find(
+                      (h) => h.candidateId === cand.id,
+                    );
 
                     return (
                       <tr
                         key={cand.id}
                         className={`transition-colors ${
-                          isWinner ? "bg-accent/5 font-medium" : "hover:bg-surface-muted/30"
+                          isWinner
+                            ? "bg-accent/5 font-medium"
+                            : "hover:bg-surface-muted/30"
                         }`}
                       >
                         <td className="py-3.5 px-4 font-semibold text-foreground">
@@ -326,7 +349,8 @@ export function ComparisonDashboard() {
                         </td>
 
                         <td className="py-3.5 px-4">
-                          {cand.result.matchingScore.blockingRequirementsFailed.length === 0 ? (
+                          {cand.result.matchingScore.blockingRequirementsFailed
+                            .length === 0 ? (
                             <span className="inline-flex items-center gap-1 text-emerald-600 font-medium">
                               <CheckCircle2 className="h-3 w-3" />
                               Aucune
@@ -334,14 +358,21 @@ export function ComparisonDashboard() {
                           ) : (
                             <span className="inline-flex items-center gap-1 text-rose-600 font-medium">
                               <AlertTriangle className="h-3 w-3" />
-                              {cand.result.matchingScore.blockingRequirementsFailed.length} manquante(s)
+                              {
+                                cand.result.matchingScore
+                                  .blockingRequirementsFailed.length
+                              }{" "}
+                              manquante(s)
                             </span>
                           )}
                         </td>
 
                         <td className="py-3.5 px-4 max-w-xs">
                           {highlight?.pros.slice(0, 2).map((p, i) => (
-                            <p key={i} className="text-[11px] text-foreground/80 leading-tight">
+                            <p
+                              key={i}
+                              className="text-sm text-foreground/80 leading-tight"
+                            >
                               • {p}
                             </p>
                           ))}
@@ -351,7 +382,7 @@ export function ComparisonDashboard() {
                           <button
                             type="button"
                             onClick={() => setSelectedResultToView(cand.result)}
-                            className="rounded-md border border-border bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground hover:bg-surface-muted transition-colors"
+                            className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm font-semibold text-foreground hover:bg-surface-muted transition-colors"
                           >
                             Consulter
                           </button>
@@ -368,4 +399,3 @@ export function ComparisonDashboard() {
     </div>
   );
 }
-

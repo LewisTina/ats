@@ -27,12 +27,12 @@ export function HistoryModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-background/80 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-background/90 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-xl rounded-xl border border-border bg-surface p-6 shadow-xl transition-all">
+      <div className="relative w-full max-w-screen-lg rounded-xl border border-border bg-surface p-6 shadow-xl transition-all">
         <div className="flex items-center justify-between pb-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-accent" />
@@ -82,7 +82,7 @@ export function HistoryModal({
                   <p className="text-xs font-semibold text-foreground truncate">
                     {item.job.title || "Offre sans titre"}
                   </p>
-                  <div className="flex items-center gap-2 text-[11px] text-foreground/50 mt-0.5">
+                  <div className="flex items-center gap-2 text-sm text-foreground/50 mt-0.5">
                     <span>{item.resume.fileName}</span>
                     <span>•</span>
                     <span>ATS: {item.atsScore.total}/100</span>
@@ -107,7 +107,7 @@ export function HistoryModal({
                       onSelect(item);
                       onClose();
                     }}
-                    className="flex items-center gap-1 rounded bg-foreground px-2 py-1 text-[11px] font-medium text-background hover:opacity-90"
+                    className="flex items-center gap-1 rounded bg-foreground px-2 py-1 text-sm font-medium text-background hover:opacity-90"
                   >
                     <span>Charger</span>
                     <ArrowRight className="h-3 w-3" />
@@ -129,4 +129,3 @@ export function HistoryModal({
     </div>
   );
 }
-

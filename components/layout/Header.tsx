@@ -56,20 +56,14 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/80 backdrop-blur-md  px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between">
         {/* Left: Branding */}
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-background shadow-sm">
-            <FileText className="h-5 w-5" />
-          </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-foreground tracking-tight">
                 CV Analyzer
-              </span>
-              <span className="hidden rounded bg-surface-muted px-1.5 py-0.5 text-[11px] font-medium text-foreground/70 sm:inline-block">
-                Local
               </span>
             </div>
             <p className="text-xs text-foreground/60 hidden sm:block">
@@ -83,7 +77,7 @@ export function Header({
           <button
             type="button"
             onClick={() => onTabChange("single")}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors ${
               activeTab === "single"
                 ? "bg-foreground text-background shadow-xs"
                 : "text-foreground/70 hover:text-foreground"
@@ -95,7 +89,7 @@ export function Header({
           <button
             type="button"
             onClick={() => onTabChange("compare")}
-            className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors ${
               activeTab === "compare"
                 ? "bg-foreground text-background shadow-xs"
                 : "text-foreground/70 hover:text-foreground"
@@ -160,11 +154,14 @@ export function Header({
             aria-label="Basculer le thème"
             title={isDark ? "Passer en mode clair" : "Passer en mode sombre"}
           >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {isDark ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
     </header>
   );
 }
-

@@ -22,11 +22,13 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"single" | "compare">("single");
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
-  const [targetPosition, setTargetPosition] = useState<TargetPosition>("general");
+  const [targetPosition, setTargetPosition] =
+    useState<TargetPosition>("general");
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [currentResult, setCurrentResult] = useState<SingleAnalysisResult | null>(null);
+  const [currentResult, setCurrentResult] =
+    useState<SingleAnalysisResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // History state
@@ -45,9 +47,15 @@ export default function HomePage() {
 
   const saveToHistory = (result: SingleAnalysisResult) => {
     try {
-      const nextHistory = [result, ...history.filter((h) => h.id !== result.id)].slice(0, 20);
+      const nextHistory = [
+        result,
+        ...history.filter((h) => h.id !== result.id),
+      ].slice(0, 20);
       setHistory(nextHistory);
-      localStorage.setItem(LOCAL_STORAGE_HISTORY_KEY, JSON.stringify(nextHistory));
+      localStorage.setItem(
+        LOCAL_STORAGE_HISTORY_KEY,
+        JSON.stringify(nextHistory),
+      );
     } catch (_) {}
   };
 
@@ -62,14 +70,17 @@ export default function HomePage() {
     const nextHistory = history.filter((h) => h.id !== id);
     setHistory(nextHistory);
     try {
-      localStorage.setItem(LOCAL_STORAGE_HISTORY_KEY, JSON.stringify(nextHistory));
+      localStorage.setItem(
+        LOCAL_STORAGE_HISTORY_KEY,
+        JSON.stringify(nextHistory),
+      );
     } catch (_) {}
   };
 
   const canAnalyze = Boolean(
     parsedResume &&
-      parsedResume.rawText.length > 30 &&
-      jobDescription.trim().length >= 20
+    parsedResume.rawText.length > 30 &&
+    jobDescription.trim().length >= 20,
   );
 
   const handleStartAnalysis = async () => {
@@ -93,7 +104,9 @@ export default function HomePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Une erreur est survenue lors de l'analyse.");
+        throw new Error(
+          data.error || "Une erreur est survenue lors de l'analyse.",
+        );
       }
 
       setCurrentResult(data.result);
@@ -103,7 +116,9 @@ export default function HomePage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setErrorMessage(
-        err instanceof Error ? err.message : "Erreur inattendue lors de l'analyse."
+        err instanceof Error
+          ? err.message
+          : "Erreur inattendue lors de l'analyse.",
       );
     } finally {
       setIsLoading(false);
@@ -124,7 +139,7 @@ export default function HomePage() {
       />
 
       {/* Main Content Area */}
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto w-full flex-1 flex flex-col">
         {activeTab === "compare" ? (
           <ComparisonDashboard />
         ) : currentResult ? (
@@ -136,15 +151,19 @@ export default function HomePage() {
             }}
           />
         ) : (
-          <div className="space-y-8">
+          <div className="flex flex-col flex-1">
             {/* Hero / Intro */}
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Analysez votre CV avant de postuler.
-              </h1>
-              <p className="max-w-3xl text-sm text-foreground/60 leading-relaxed">
-                Comparez votre CV à une offre d'emploi, identifiez les écarts, évaluez sa lisibilité par les systèmes ATS et découvrez comment améliorer votre candidature.
-              </p>
+            <div className="flex px-4 sm:px-6 border-b border-border">
+              <div className="w-full max-w-screen-2xl mx-auto space-y-2 py-4">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  Analysez votre CV avant de postuler.
+                </h1>
+                <p className="max-w-3xl text-sm text-foreground/60 leading-relaxed">
+                  Comparez votre CV à une offre d'emploi, identifiez les écarts,
+                  évaluez sa lisibilité par les systèmes ATS et découvrez
+                  comment améliorer votre candidature.
+                </p>
+              </div>
             </div>
 
             {/* Error banner if any */}
@@ -160,27 +179,28 @@ export default function HomePage() {
             ) : (
               <>
                 {/* Two Main Cards: Resume (Left) + Job Description (Right) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                  <FileUploadCard
-                    label="Votre CV"
-                    parsedResume={parsedResume}
-                    onParsed={(resume) => {
-                      setParsedResume(resume);
-                      setErrorMessage(null);
-                    }}
-                    onClear={() => setParsedResume(null)}
-                  />
+                <div className="flex flex-1 px-4 sm:px-6 bg-surface">
+                  <div className="w-full max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 items-start divide-x divide-border border-x border-border">
+                    <FileUploadCard
+                      label="Votre CV"
+                      parsedResume={parsedResume}
+                      onParsed={(resume) => {
+                        setParsedResume(resume);
+                        setErrorMessage(null);
+                      }}
+                      onClear={() => setParsedResume(null)}
+                    />
 
-                  <JobCard
-                    value={jobDescription}
-                    onChange={(val) => {
-                      setJobDescription(val);
-                      setErrorMessage(null);
-                    }}
-                    onClear={() => setJobDescription("")}
-                  />
+                    <JobCard
+                      value={jobDescription}
+                      onChange={(val) => {
+                        setJobDescription(val);
+                        setErrorMessage(null);
+                      }}
+                      onClear={() => setJobDescription("")}
+                    />
+                  </div>
                 </div>
-
                 {/* Analysis Options and Trigger */}
                 <AnalysisOptions
                   targetPosition={targetPosition}
@@ -213,4 +233,3 @@ export default function HomePage() {
     </div>
   );
 }
-

@@ -114,7 +114,9 @@ export function AnalysisOptions({
               <div className="flex items-center gap-1.5">
                 <Zap
                   className={`h-3.5 w-3.5 ${
-                    analysisMode === "fast" ? "text-amber-500" : "text-foreground/50"
+                    analysisMode === "fast"
+                      ? "text-amber-500"
+                      : "text-foreground/50"
                   }`}
                 />
                 <span
@@ -143,7 +145,9 @@ export function AnalysisOptions({
               <div className="flex items-center gap-1.5">
                 <Sparkles
                   className={`h-3.5 w-3.5 ${
-                    analysisMode === "smart" ? "text-accent" : "text-foreground/50"
+                    analysisMode === "smart"
+                      ? "text-accent"
+                      : "text-foreground/50"
                   }`}
                 />
                 <span
@@ -158,11 +162,6 @@ export function AnalysisOptions({
                 Analyse déterministe enrichie par compréhension sémantique.
               </span>
             </button>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-[11px] text-foreground/60 pt-1">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Vos documents restent strictement locaux sur votre MacBook.</span>
           </div>
         </div>
       </div>
@@ -186,4 +185,3 @@ export function AnalysisOptions({
     </div>
   );
 }
-

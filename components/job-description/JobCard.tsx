@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Briefcase, Eraser, Sparkles } from "lucide-react";
+import Panel from "../layout/panel";
 
 interface JobCardProps {
   value: string;
@@ -83,47 +84,38 @@ export function JobCard({ value, onChange, onClear }: JobCardProps) {
   const charCount = value.length;
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-surface p-5 shadow-xs transition-all">
-      <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-surface-muted text-foreground/80">
-            <Briefcase className="h-4 w-4" />
-          </div>
-          <h2 className="text-sm font-semibold text-foreground tracking-tight">
-            Offre d'emploi
-          </h2>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-foreground/50 font-medium">
-            {charCount} caractère{charCount > 1 ? "s" : ""}
-          </span>
+    <Panel
+      icon={"Briefcase"}
+      indication={`${charCount} caractère${charCount > 1 ? "s" : ""}`}
+      action={
+        <>
           {value && (
             <button
               type="button"
               onClick={onClear}
-              className="flex items-center gap-1 text-[11px] text-foreground/60 hover:text-rose-600 transition-colors"
+              className="flex items-center gap-1 text-sm text-foreground/60 hover:text-rose-600 transition-colors"
               title="Effacer le texte"
             >
               <Eraser className="h-3 w-3" />
               <span>Effacer</span>
             </button>
           )}
-        </div>
-      </div>
-
-      <div className="flex flex-col flex-1">
+        </>
+      }
+      title={"Offre d'emploi"}
+    >
+      <div className="relative flex-1">
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Collez ici la description complète de l'offre d'emploi (intitulé, missions, compétences techniques requises, technologies souhaitées, expérience...)..."
           rows={9}
-          className="w-full resize-none rounded-lg border border-border bg-background p-3.5 text-xs text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-foreground/20 leading-relaxed font-sans"
+          className="w-full h-full resize-none rounded-lg border border-border bg-background p-3.5 text-sm text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-foreground/20 leading-relaxed font-sans pb-12"
         />
 
         {/* Quick sample insertion */}
-        <div className="mt-3 flex flex-wrap items-center gap-1.5 pt-2 border-t border-border/60">
-          <span className="flex items-center gap-1 text-[11px] text-foreground/50 font-medium mr-1">
+        <div className="flex flex-wrap items-center gap-1.5 bg-surface absolute bottom-2 px-4 py-2 left-2 right-2 rounded-md">
+          <span className="flex items-center gap-1 text-sm text-foreground font-medium mr-1">
             <Sparkles className="h-3 w-3 text-amber-500" />
             Exemples types :
           </span>
@@ -132,14 +124,13 @@ export function JobCard({ value, onChange, onClear }: JobCardProps) {
               key={sample.label}
               type="button"
               onClick={() => onChange(sample.text)}
-              className="rounded-md border border-border bg-surface-muted/60 px-2 py-1 text-[11px] font-medium text-foreground/75 hover:bg-surface-muted hover:text-foreground transition-colors"
+              className="rounded-md border border-border bg-surface-muted/60 px-2 py-1 text-sm font-medium text-foreground/75 hover:bg-surface-muted hover:text-foreground transition-colors"
             >
               {sample.label}
             </button>
           ))}
         </div>
       </div>
-    </div>
+    </Panel>
   );
 }
-
