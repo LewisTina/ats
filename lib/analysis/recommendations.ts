@@ -5,15 +5,13 @@ import type {
   ATSDiagnostic,
   AnalyzedJob,
   ParsedResume,
-  TargetPosition,
 } from "@/types";
 
 export function generateRecommendationsAndSummary(
   matches: RequirementMatch[],
   atsDiagnostics: ATSDiagnostic[],
   job: AnalyzedJob,
-  resume: ParsedResume,
-  targetPosition: TargetPosition
+  resume: ParsedResume
 ): { recommendations: Recommendation[]; summary: ExecutiveSummary } {
   const recommendations: Recommendation[] = [];
 
@@ -24,8 +22,8 @@ export function generateRecommendationsAndSummary(
       id: `rec-mandatory-${item.requirementId}`,
       title: `Intégrer ou clarifier votre pratique de ${item.requirementLabel}`,
       issue: `L'exigence "${item.requirementLabel}" est mentionnée comme indispensable dans l'annonce mais reste introuvable dans votre CV.`,
-      relevanceToJob: `Les recruteurs et filtres techniques éliminent souvent en priorité les profils n'affichant pas explicitement cette exigence clé.`,
-      suggestion: `Si vous avez manipulé ou côtoyé cette technologie lors d'une mission ou d'un projet personnel, explicitez-la dans la description du projet correspondant. Si vous ne la maîtrisez pas, préparez une réponse honnête sur votre capacité d'apprentissage rapide.`,
+      relevanceToJob: `Les recruteurs et filtres éliminent souvent en priorité les profils n'affichant pas explicitement cette exigence clé.`,
+      suggestion: `Si vous avez mobilisé cette compétence lors d'une mission ou d'un projet, explicitez-la dans la description de l'expérience correspondante. Si vous ne la maîtrisez pas, préparez une réponse honnête sur votre capacité d'adaptation rapide.`,
       priority: "high",
       category: "mandatory_gap",
     });
@@ -59,53 +57,7 @@ export function generateRecommendationsAndSummary(
     });
   }
 
-  // 4. Target Position specific valorization
-  if (targetPosition === "fullstack") {
-    const hasBackAndFront =
-      resume.detectedSkills.some((s) => ["React", "Vue.js", "Angular", "Next.js"].includes(s)) &&
-      resume.detectedSkills.some((s) => ["Node.js", "Python", "Java", "Go", "PostgreSQL"].includes(s));
-    if (!hasBackAndFront) {
-      recommendations.push({
-        id: "rec-pos-fullstack",
-        title: "Équilibrer la visibilité Front-End et Back-End",
-        issue: "Pour un positionnement Full-Stack, le CV doit démontrer un équilibre clair entre interface utilisateur et logique serveur/données.",
-        relevanceToJob: "L'offre recherche une autonomie de bout en bout sur la chaîne applicative.",
-        suggestion: "Mettez en avant vos contributions aux API et modèles de données autant que le travail sur les interfaces.",
-        priority: "medium",
-        category: "valorization",
-      });
-    }
-  } else if (targetPosition === "mobile") {
-    const hasMobile = resume.detectedSkills.some((s) =>
-      ["React Native", "Flutter", "Swift", "Kotlin", "iOS", "Android"].includes(s)
-    );
-    if (!hasMobile) {
-      recommendations.push({
-        id: "rec-pos-mobile",
-        title: "Mettre en avant vos réalisations mobiles spécifiques",
-        issue: "Aucune technologie mobile majeure (React Native, Flutter, Swift, Kotlin) n'est identifiée nettement en tête de CV.",
-        relevanceToJob: "Pour une candidature ciblée Mobile, la publication d'applications (App Store, Google Play) est un différenciateur direct.",
-        suggestion: "Indiquez les liens de vos applications publiées ou dépôts de démonstration.",
-        priority: "high",
-        category: "valorization",
-      });
-    }
-  } else if (targetPosition === "frontend") {
-    const hasDesignSystem = resume.detectedSkills.includes("Design System") || /storybook|shadcn|accessibilit/i.test(resume.rawText);
-    if (!hasDesignSystem) {
-      recommendations.push({
-        id: "rec-pos-frontend",
-        title: "Valoriser l'ergonomie, les composants et le Design System",
-        issue: "Le profil Front-End / Design System gagne à expliciter les pratiques de composants réutilisables et de tests UI.",
-        relevanceToJob: "Recherché pour des interfaces soignées et modulaires.",
-        suggestion: "Mentionnez explicitement Storybook, tests d'accessibilité (a11y) ou bibliothèques de composants créées.",
-        priority: "low",
-        category: "valorization",
-      });
-    }
-  }
-
-  // Deduplicate and limit recommendations to top 6
+  // Deduplicate and limit recommendations to top 7
   const uniqueRecs = recommendations.slice(0, 7);
 
   // Executive summary generation
@@ -137,7 +89,7 @@ export function generateRecommendationsAndSummary(
   }
 
   const summary: ExecutiveSummary = {
-    strengths: confirmed.length > 0 ? confirmed.slice(0, 5) : ["Profil technique correspondant aux bases attendues."],
+    strengths: confirmed.length > 0 ? confirmed.slice(0, 5) : ["Profil correspondant aux bases attendues de l'offre."],
     majorGaps: gaps.length > 0 ? gaps.slice(0, 5) : ["Aucun écart majeur détecté."],
     blockingAlerts:
       blocking.length > 0

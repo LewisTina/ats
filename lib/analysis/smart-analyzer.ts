@@ -1,7 +1,6 @@
 import type {
   ParsedResume,
   SingleAnalysisResult,
-  TargetPosition,
   RequirementMatch,
   Recommendation,
 } from "@/types";
@@ -12,14 +11,12 @@ import { calculateMatchingScore } from "./scoring";
 export async function runSmartOrFastAnalysis(
   resume: ParsedResume,
   jobDescriptionText: string,
-  targetPosition: TargetPosition = "general",
   mode: "fast" | "smart" = "fast"
 ): Promise<SingleAnalysisResult> {
   // Always run deterministic base first
   const baseResult = runDeterministicAnalysis(
     resume,
     jobDescriptionText,
-    targetPosition,
     mode
   );
 
@@ -41,8 +38,7 @@ export async function runSmartOrFastAnalysis(
 
   const aiResult = await aiProvider.analyze(
     resume.rawText,
-    jobDescriptionText,
-    targetPosition
+    jobDescriptionText
   );
 
   if (!aiResult.success || !aiResult.data) {

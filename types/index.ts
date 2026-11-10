@@ -1,7 +1,5 @@
 export type FileType = "pdf" | "docx";
 
-export type TargetPosition = "fullstack" | "frontend" | "mobile" | "general";
-
 export type AnalysisMode = "fast" | "smart";
 
 export type RequirementStatus = "confirmed" | "partial" | "missing";
@@ -80,7 +78,6 @@ export interface JobRequirement {
 export interface AnalyzedJob {
   rawText: string;
   title?: string;
-  targetPosition: TargetPosition;
   requirements: JobRequirement[];
   seniorityRequired?: string;
   yearsOfExperienceRequired?: number;
@@ -151,7 +148,6 @@ export interface SingleAnalysisResult {
   id: string;
   createdAt: string;
   mode: AnalysisMode;
-  targetPosition: TargetPosition;
   resume: ParsedResume;
   job: AnalyzedJob;
   atsScore: ATSScoreBreakdown;
@@ -170,14 +166,13 @@ export interface SingleAnalysisResult {
 
 export interface ComparisonCandidate {
   id: string;
-  label: string; // e.g. "CV Full-Stack", "CV Mobile"
+  label: string;
   fileName: string;
   result: SingleAnalysisResult;
 }
 
 export interface ComparisonReport {
   jobTitle: string;
-  targetPosition: TargetPosition;
   candidates: ComparisonCandidate[];
   recommendedCandidateId: string;
   recommendationReason: string;

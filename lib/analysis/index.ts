@@ -1,7 +1,6 @@
 import type {
   ParsedResume,
   SingleAnalysisResult,
-  TargetPosition,
   AnalysisMode,
 } from "@/types";
 import { analyzeJobDescription, matchRequirements } from "./job-matcher";
@@ -12,10 +11,9 @@ import { generateRecommendationsAndSummary } from "./recommendations";
 export function runDeterministicAnalysis(
   resume: ParsedResume,
   jobDescriptionText: string,
-  targetPosition: TargetPosition = "general",
   mode: AnalysisMode = "fast"
 ): SingleAnalysisResult {
-  const analyzedJob = analyzeJobDescription(jobDescriptionText, targetPosition);
+  const analyzedJob = analyzeJobDescription(jobDescriptionText);
   const { score: atsScore, diagnostics: atsDiagnostics } = evaluateATSReadability(resume);
   const requirementsMatches = matchRequirements(analyzedJob.requirements, resume);
   const matchingScore = calculateMatchingScore(requirementsMatches);
@@ -23,8 +21,7 @@ export function runDeterministicAnalysis(
     requirementsMatches,
     atsDiagnostics,
     analyzedJob,
-    resume,
-    targetPosition
+    resume
   );
 
   const confirmedSkills = requirementsMatches
@@ -43,7 +40,6 @@ export function runDeterministicAnalysis(
     id: `analysis-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     createdAt: new Date().toISOString(),
     mode,
-    targetPosition,
     resume,
     job: analyzedJob,
     atsScore,

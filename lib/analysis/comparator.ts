@@ -1,18 +1,15 @@
 import type {
   ComparisonCandidate,
   ComparisonReport,
-  TargetPosition,
 } from "@/types";
 
 export function compareResumeAnalyses(
   candidates: ComparisonCandidate[],
-  jobTitle: string,
-  targetPosition: TargetPosition
+  jobTitle: string
 ): ComparisonReport {
   if (candidates.length === 0) {
     return {
       jobTitle,
-      targetPosition,
       candidates: [],
       recommendedCandidateId: "",
       recommendationReason: "Aucun CV fourni pour la comparaison.",
@@ -88,7 +85,6 @@ export function compareResumeAnalyses(
 
   return {
     jobTitle: jobTitle || "Offre d'emploi",
-    targetPosition,
     candidates,
     recommendedCandidateId: best.candidate.id,
     recommendationReason,

@@ -19,7 +19,7 @@ describe("Job Requirement Analysis & Deterministic Matching", () => {
   `;
 
   it("extracts requirements, differentiates required vs bonus", () => {
-    const analyzed = analyzeJobDescription(sampleJobText, "fullstack");
+    const analyzed = analyzeJobDescription(sampleJobText);
 
     expect(analyzed.title).toContain("Full-Stack Senior");
     expect(analyzed.yearsOfExperienceRequired).toBe(5);
@@ -40,7 +40,7 @@ describe("Job Requirement Analysis & Deterministic Matching", () => {
   });
 
   it("identifies confirmed, partial and missing skills with exact proofs", () => {
-    const analyzed = analyzeJobDescription(sampleJobText, "fullstack");
+    const analyzed = analyzeJobDescription(sampleJobText);
 
     const resume: ParsedResume = {
       rawText: `

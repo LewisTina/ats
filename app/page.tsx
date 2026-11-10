@@ -12,7 +12,6 @@ import { HistoryModal } from "@/components/history/HistoryModal";
 import type {
   ParsedResume,
   SingleAnalysisResult,
-  TargetPosition,
   AnalysisMode,
 } from "@/types";
 
@@ -22,8 +21,6 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"single" | "compare">("single");
   const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null);
   const [jobDescription, setJobDescription] = useState<string>("");
-  const [targetPosition, setTargetPosition] =
-    useState<TargetPosition>("general");
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -96,7 +93,6 @@ export default function HomePage() {
         body: JSON.stringify({
           resume: parsedResume,
           jobDescription,
-          targetPosition,
           mode: analysisMode,
         }),
       });
@@ -203,8 +199,6 @@ export default function HomePage() {
                 </div>
                 {/* Analysis Options and Trigger */}
                 <AnalysisOptions
-                  targetPosition={targetPosition}
-                  onPositionChange={setTargetPosition}
                   analysisMode={analysisMode}
                   onModeChange={setAnalysisMode}
                   onAnalyze={handleStartAnalysis}

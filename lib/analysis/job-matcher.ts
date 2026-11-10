@@ -4,7 +4,6 @@ import type {
   JobRequirement,
   ParsedResume,
   RequirementMatch,
-  TargetPosition,
 } from "@/types";
 import {
   extractSkillsFromText,
@@ -36,7 +35,6 @@ export const JobRequirementSchema = z.object({
 export const AnalyzedJobSchema = z.object({
   rawText: z.string(),
   title: z.string().optional(),
-  targetPosition: z.enum(["fullstack", "frontend", "mobile", "general"]),
   requirements: z.array(JobRequirementSchema),
   seniorityRequired: z.string().optional(),
   yearsOfExperienceRequired: z.number().optional(),
@@ -78,8 +76,7 @@ const PREFERRED_MARKERS = [
 ];
 
 export function analyzeJobDescription(
-  jobText: string,
-  targetPosition: TargetPosition = "general"
+  jobText: string
 ): AnalyzedJob {
   const requirements: JobRequirement[] = [];
   const lines = jobText.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
@@ -155,9 +152,9 @@ export function analyzeJobDescription(
         ? "responsibility"
         : "technical_skill";
 
-    // Find sentence containing this skill to evaluate required vs preferred
+    // Find line/sentence containing this skill to evaluate required vs preferred
     const escaped = canonical.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const sentenceRegex = new RegExp(`([^.!?\n]*?${escaped}[^.!?\n]*)`, "i");
+    const sentenceRegex = new RegExp(`([^\n]*?${escaped}[^\n]*)`, "i");
     const sentenceMatch = jobText.match(sentenceRegex);
     const sentence = sentenceMatch ? sentenceMatch[1].toLowerCase() : "";
 
@@ -175,19 +172,8 @@ export function analyzeJobDescription(
       isRequired = false;
       importance = 2;
     } else {
-      // Not explicitly marked as required or preferred
-      // Only treat as required if it is the core skill of the target position
-      if (
-        (targetPosition === "frontend" && def?.category === "frontend") ||
-        (targetPosition === "mobile" && def?.category === "mobile") ||
-        (targetPosition === "fullstack" && (canonical === "React" || canonical === "Node.js" || canonical === "TypeScript"))
-      ) {
-        isRequired = true;
-        importance = 4;
-      } else {
-        isRequired = false;
-        importance = 3;
-      }
+      isRequired = false;
+      importance = 3;
     }
 
     requirements.push({
@@ -231,7 +217,6 @@ export function analyzeJobDescription(
   return {
     rawText: jobText,
     title,
-    targetPosition,
     requirements,
     seniorityRequired: seniority,
     yearsOfExperienceRequired: yearsOfExp,

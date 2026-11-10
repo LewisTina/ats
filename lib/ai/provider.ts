@@ -3,15 +3,13 @@ import {
   buildAIPrompt,
   type AIAnalysisResponse,
 } from "./prompts";
-import type { TargetPosition } from "@/types";
 
 export interface AIProvider {
   name: string;
   isConfigured(): boolean;
   analyze(
     resumeText: string,
-    jobText: string,
-    targetPosition: TargetPosition
+    jobText: string
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }>;
 }
 
@@ -79,8 +77,7 @@ export class ConfigurableLLMProvider implements AIProvider {
 
   async analyze(
     resumeText: string,
-    jobText: string,
-    targetPosition: TargetPosition
+    jobText: string
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }> {
     if (!this.isConfigured()) {
       return {
@@ -89,7 +86,7 @@ export class ConfigurableLLMProvider implements AIProvider {
       };
     }
 
-    const { systemPrompt, userPrompt } = buildAIPrompt(resumeText, jobText, targetPosition);
+    const { systemPrompt, userPrompt } = buildAIPrompt(resumeText, jobText);
     const endpoint = `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
 
     const headers: Record<string, string> = {

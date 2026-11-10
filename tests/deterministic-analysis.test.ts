@@ -74,7 +74,6 @@ describe("Full Deterministic & Smart Analysis Pipeline", () => {
     const result = runDeterministicAnalysis(
       mockResume,
       jobDescription,
-      "fullstack",
       "fast"
     );
 
@@ -99,7 +98,6 @@ describe("Full Deterministic & Smart Analysis Pipeline", () => {
     const result = await runSmartOrFastAnalysis(
       mockResume,
       jobDescription,
-      "fullstack",
       "smart"
     );
 

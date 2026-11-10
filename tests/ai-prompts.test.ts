@@ -9,14 +9,14 @@ describe("AI Prompt & Schema Validation", () => {
   it("generates system and user prompts preventing hallucinations and enforcing JSON output", () => {
     const { systemPrompt, userPrompt } = buildAIPrompt(
       "CV Text Sample",
-      "Job Description Sample",
-      "fullstack"
+      "Job Description Sample"
     );
 
     expect(systemPrompt).toContain("Ne JAMAIS inventer d'expériences");
     expect(systemPrompt).toContain("JavaScript n'est PAS Java");
     expect(systemPrompt).toContain("React n'est PAS automatiquement React Native");
-    expect(userPrompt).toContain("FULLSTACK");
+    expect(userPrompt).toContain("CV Text Sample");
+    expect(userPrompt).toContain("Job Description Sample");
   });
 
   it("extracts pure JSON from content with reasoning <think> blocks and code fences", () => {

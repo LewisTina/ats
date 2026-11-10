@@ -8,7 +8,6 @@ export const maxDuration = 300;
 const RequestBodySchema = z.object({
   resume: z.custom<ParsedResume>((val) => val && typeof val === "object"),
   jobDescription: z.string().min(15, "La description de l'offre doit contenir au moins 15 caractères."),
-  targetPosition: z.enum(["fullstack", "frontend", "mobile", "general"]).default("general"),
   mode: z.enum(["fast", "smart"]).default("fast"),
 });
 
@@ -27,12 +26,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { resume, jobDescription, targetPosition, mode } = validation.data;
+    const { resume, jobDescription, mode } = validation.data;
 
     const result = await runSmartOrFastAnalysis(
       resume,
       jobDescription,
-      targetPosition,
       mode
     );
 

@@ -78,10 +78,6 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
             CV :{" "}
             <span className="font-medium text-foreground">
               {resume.fileName}
-            </span>{" "}
-            • Cible :{" "}
-            <span className="capitalize font-medium text-foreground">
-              {result.targetPosition}
             </span>
           </p>
         </div>

@@ -17,7 +17,6 @@ import type {
   ComparisonReport,
   ParsedResume,
   SingleAnalysisResult,
-  TargetPosition,
   AnalysisMode,
 } from "@/types";
 import { FileUploadCard } from "@/components/upload/FileUploadCard";
@@ -32,8 +31,6 @@ interface MultiCVItem {
 
 export function ComparisonDashboard() {
   const [jobDescription, setJobDescription] = useState("");
-  const [targetPosition, setTargetPosition] =
-    useState<TargetPosition>("general");
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
 
   const [cvList, setCvList] = useState<MultiCVItem[]>([
@@ -105,7 +102,6 @@ export function ComparisonDashboard() {
         body: JSON.stringify({
           resumes: activeResumes,
           jobDescription,
-          targetPosition,
           mode: analysisMode,
         }),
       });
@@ -154,9 +150,8 @@ export function ComparisonDashboard() {
           Comparateur multi-versions de CV
         </h1>
         <p className="mt-1 text-sm text-foreground/60">
-          Importez vos différentes déclinaisons (Full-Stack, Mobile, Front-End)
-          face à la même offre et découvrez objectivement la version la plus
-          adaptée.
+          Importez vos différentes versions de CV face à la même offre et
+          découvrez objectivement la version la plus adaptée.
         </p>
       </div>
 

@@ -12,7 +12,6 @@ describe("Multi-CV Comparator", () => {
       id: "res-1",
       createdAt: new Date().toISOString(),
       mode: "fast",
-      targetPosition: "fullstack",
       resume: {
         rawText: "sample",
         fileName: "cv.pdf",
@@ -32,7 +31,6 @@ describe("Multi-CV Comparator", () => {
       },
       job: {
         rawText: "job",
-        targetPosition: "fullstack",
         requirements: [],
         languages: [],
       },
@@ -87,7 +85,7 @@ describe("Multi-CV Comparator", () => {
       },
     ];
 
-    const report = compareResumeAnalyses(candidates, "Tech Lead Full-Stack", "fullstack");
+    const report = compareResumeAnalyses(candidates, "Tech Lead Full-Stack");
 
     // cand-2 must win because it has 0 blocking issues!
     expect(report.recommendedCandidateId).toBe("cand-2");

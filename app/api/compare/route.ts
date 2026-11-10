@@ -15,7 +15,6 @@ const CompareBodySchema = z.object({
     })
   ).min(2, "Au moins 2 CV sont nécessaires pour effectuer une comparaison."),
   jobDescription: z.string().min(15, "La description de l'offre est requise."),
-  targetPosition: z.enum(["fullstack", "frontend", "mobile", "general"]).default("general"),
   mode: z.enum(["fast", "smart"]).default("fast"),
 });
 
@@ -34,7 +33,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { resumes, jobDescription, targetPosition, mode } = validation.data;
+    const { resumes, jobDescription, mode } = validation.data;
 
     // Run analyses in parallel
     const candidates: ComparisonCandidate[] = await Promise.all(
@@ -42,7 +41,6 @@ export async function POST(req: NextRequest) {
         const result = await runSmartOrFastAnalysis(
           item.data,
           jobDescription,
-          targetPosition,
           mode
         );
         return {
@@ -55,7 +53,7 @@ export async function POST(req: NextRequest) {
     );
 
     const firstJobTitle = candidates[0]?.result.job.title || "Offre d'emploi";
-    const report = compareResumeAnalyses(candidates, firstJobTitle, targetPosition);
+    const report = compareResumeAnalyses(candidates, firstJobTitle);
 
     return NextResponse.json({ success: true, report });
   } catch (error) {

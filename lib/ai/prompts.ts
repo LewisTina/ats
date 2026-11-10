@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { TargetPosition } from "@/types";
 
 // Flexible status preprocessor
 const statusSchema = z.preprocess((val) => {
@@ -189,10 +188,9 @@ export type AIAnalysisResponse = z.infer<typeof AIAnalysisResponseSchema>;
 
 export function buildAIPrompt(
   resumeText: string,
-  jobText: string,
-  targetPosition: TargetPosition
+  jobText: string
 ): { systemPrompt: string; userPrompt: string } {
-  const systemPrompt = `Tu es un expert senior en recrutement technique, en analyse documentaire et en évaluation ATS.
+  const systemPrompt = `Tu es un expert senior en recrutement, en analyse documentaire et en évaluation ATS.
 Ton rôle est d'analyser la compatibilité d'un CV avec une offre d'emploi de manière rigoureuse, factuelle, nuancée et constructive.
 
 Règles absolues :
@@ -201,13 +199,11 @@ Règles absolues :
    - JavaScript n'est PAS Java.
    - React n'est PAS automatiquement React Native (mobile).
    - Docker ne prouve PAS Kubernetes.
-   - 5 ans d'expérience globale ne signifient pas 5 ans sur chaque technologie.
+   - 5 ans d'expérience globale ne signifient pas 5 ans sur chaque compétence ou technologie.
 3. Si une compétence n'est pas mentionnée dans le CV, cela ne signifie pas automatiquement que le candidat en est incapable, mais simplement qu'elle n'est pas démontrée dans le document.
 4. Réponds UNIQUEMENT sous forme d'un objet JSON strict respectant la structure demandée, sans texte avant ou après.`;
 
-  const userPrompt = `Voici le positionnement visé : ${targetPosition.toUpperCase()}
-
-=== OFFRE D'EMPLOI ===
+  const userPrompt = `=== OFFRE D'EMPLOI ===
 ${jobText}
 
 === CV DU CANDIDAT (TEXTE EXTRAIT) ===
