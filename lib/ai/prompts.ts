@@ -70,8 +70,53 @@ const booleanSchema = z.preprocess((val) => {
   return false;
 }, z.boolean());
 
+// Flexible category preprocessor
+const categorySchema = z.preprocess((val) => {
+  if (typeof val !== "string") return undefined;
+  const c = val.toLowerCase().trim();
+  if (c === "experience_seniority" || c.includes("exp") || c.includes("senior") || c.includes("sénior")) {
+    return "experience_seniority";
+  }
+  if (c === "framework_tool" || c.includes("framework") || c.includes("tool") || c.includes("outil")) {
+    return "framework_tool";
+  }
+  if (c === "soft_skill" || c.includes("soft") || c.includes("humain") || c.includes("comportement")) {
+    return "soft_skill";
+  }
+  if (c === "education_degree" || c.includes("educ") || c.includes("dipl") || c.includes("formation")) {
+    return "education_degree";
+  }
+  if (c === "language" || c.includes("lang")) {
+    return "language";
+  }
+  if (c === "responsibility" || c.includes("respons") || c.includes("mission")) {
+    return "responsibility";
+  }
+  if (c === "methodology" || c.includes("method") || c.includes("méthod") || c.includes("agile")) {
+    return "methodology";
+  }
+  if (c === "other" || c.includes("autre")) {
+    return "other";
+  }
+  if (c === "technical_skill" || c.includes("tech")) {
+    return "technical_skill";
+  }
+  return undefined;
+}, z.enum([
+  "technical_skill",
+  "framework_tool",
+  "experience_seniority",
+  "soft_skill",
+  "education_degree",
+  "language",
+  "responsibility",
+  "methodology",
+  "other",
+]).optional());
+
 export const AIRequirementSchema = z.object({
   label: z.string().default("Compétence"),
+  category: categorySchema,
   status: statusSchema,
   proof: z.string().optional().default(""),
   explanation: z.string().optional().default(""),
@@ -112,6 +157,7 @@ export const AIAnalysisResponseSchema = z.preprocess(
           const it = item as Record<string, unknown>;
           return {
             label: it.label || it.name || it.skill || it.titre || "Compétence",
+            category: it.category || it.categorie || it.type,
             status: it.status || it.statut,
             proof: it.proof || it.preuve || it.snippet || "",
             explanation: it.explanation || it.justification || it.comment || it.raison || "",
@@ -186,24 +232,61 @@ export const AIAnalysisResponseSchema = z.preprocess(
 
 export type AIAnalysisResponse = z.infer<typeof AIAnalysisResponseSchema>;
 
+export interface AIPromptContext {
+  currentYear?: number;
+  estimatedCandidateYears?: number;
+  candidateExperienceProof?: string;
+  jobMinYears?: number;
+  jobMaxYears?: number;
+}
+
 export function buildAIPrompt(
   resumeText: string,
-  jobText: string
+  jobText: string,
+  context: AIPromptContext = {}
 ): { systemPrompt: string; userPrompt: string } {
-  const systemPrompt = `Tu es un expert senior en recrutement, en analyse documentaire et en évaluation ATS.
-Ton rôle est d'analyser la compatibilité d'un CV avec une offre d'emploi de manière rigoureuse, factuelle, nuancée et constructive.
+  const currentYear = context.currentYear ?? new Date().getFullYear();
+
+  const systemPrompt = `Tu es un expert senior en recrutement IT, en analyse documentaire et en évaluation ATS.
+Nous sommes en ${currentYear}. Ton rôle est d'analyser la compatibilité d'un CV avec une offre d'emploi de manière rigoureuse, factuelle, nuancée et constructive.
 
 Règles absolues :
-1. Ne JAMAIS inventer d'expériences, de diplômes, de métriques chiffrées ou de compétences absentes.
-2. Éviter rigoureusement les faux équivalents :
+1. Ne JAMAIS inventer d'expériences, de diplômes, de métriques chiffrées ou de compétences absentes du CV.
+2. ÉVALUATION DES TRANCHES ET INTERVALLES D'EXPÉRIENCE (CRITIQUE) :
+   - Lorsqu'une offre mentionne un intervalle (ex: "5 à 7 ans", "5 à 10 ans", "entre 3 et 5 ans", "minimum 5 à 7 ans"), la borne INFÉRIEURE (ex: 5 ans) est le seuil minimum requis, et l'intervalle représente la cible idéale.
+   - Ne transforme JAMAIS un intervalle "X à Y ans" en "Y ans minimum". Un candidat ayant X ans ou plus (ex: 5, 6 ou 7 ans pour "5 à 7 ans" ou "5 à 10 ans") est DANS la tranche recherchée : son statut DOIT être "confirmed" (et NON "partial" ni "missing").
+   - Pour calculer l'expérience du candidat, additionne ses périodes professionnelles (une période "2020 - Présent/Aujourd'hui" compte jusqu'en ${currentYear}) ou fie-toi à la durée explicitement mentionnée dans son profil.
+   - Si le candidat est légèrement sous la borne inférieure (ex: 4 ans pour "5 à 7 ans"), utilise "partial", pas "missing".
+3. Éviter rigoureusement les faux équivalents techniques :
    - JavaScript n'est PAS Java.
    - React n'est PAS automatiquement React Native (mobile).
    - Docker ne prouve PAS Kubernetes.
-   - 5 ans d'expérience globale ne signifient pas 5 ans sur chaque compétence ou technologie.
-3. Si une compétence n'est pas mentionnée dans le CV, cela ne signifie pas automatiquement que le candidat en est incapable, mais simplement qu'elle n'est pas démontrée dans le document.
-4. Réponds UNIQUEMENT sous forme d'un objet JSON strict respectant la structure demandée, sans texte avant ou après.`;
+   - 5 ans d'expérience globale ne signifient pas 5 ans sur chaque technologie récente.
+   - En revanche, reconnais les équivalences implicites directes : Next.js implique React et JavaScript ; TypeScript implique JavaScript ; App Router/NextJS 16 sont validés par une expérience solide et récente sur Next.js.
+4. Si une compétence n'est pas mentionnée dans le CV, elle n'est simplement pas démontrée dans le document ("missing").
+5. Réponds UNIQUEMENT sous forme d'un objet JSON strict respectant la structure demandée, sans texte avant ou après.`;
 
-  const userPrompt = `=== OFFRE D'EMPLOI ===
+  const preAnalysisLines: string[] = [
+    `- Année de référence : ${currentYear}`,
+  ];
+  if (context.jobMinYears !== undefined) {
+    const targetDesc = context.jobMaxYears
+      ? `Intervalle de ${context.jobMinYears} à ${context.jobMaxYears} ans (seuil minimum = ${context.jobMinYears} ans ; tout candidat ayant >= ${context.jobMinYears} ans valide ce critère en "confirmed")`
+      : `Minimum ${context.jobMinYears} ans`;
+    preAnalysisLines.push(`- Expérience demandée dans l'offre : ${targetDesc}`);
+  }
+  if (context.estimatedCandidateYears !== undefined) {
+    preAnalysisLines.push(
+      `- Expérience du candidat estimée par pré-analyse : ~${context.estimatedCandidateYears} ans${
+        context.candidateExperienceProof ? ` (${context.candidateExperienceProof})` : ""
+      }`
+    );
+  }
+
+  const userPrompt = `=== REPÈRES FACTUELS DE PRÉ-ANALYSE ===
+${preAnalysisLines.join("\n")}
+
+=== OFFRE D'EMPLOI ===
 ${jobText}
 
 === CV DU CANDIDAT (TEXTE EXTRAIT) ===
@@ -214,9 +297,10 @@ ${resumeText}
   "jobTitle": "Intitulé du poste extrait",
   "requirementsEvaluations": [
     {
-      "label": "Nom de l'exigence ou compétence clé",
+      "label": "Nom de l'exigence ou compétence clé (pour l'expérience, garde le format d'intervalle ex: '5 à 10 ans d'expérience')",
+      "category": "technical_skill", // "technical_skill" | "framework_tool" | "experience_seniority" | "methodology" | "responsibility" | "soft_skill" | "language" | "education_degree" | "other"
       "status": "confirmed", // "confirmed" | "partial" | "missing"
-      "proof": "Extrait textuel du CV justifiant le statut si applicable",
+      "proof": "Extrait textuel du CV ou calcul des dates justifiant le statut",
       "explanation": "Pourquoi ce statut a été attribué de manière factuelle",
       "confidence": "high", // "high" | "medium" | "low"
       "required": true // true si indispensable, false si souhaité/bonus
@@ -234,7 +318,7 @@ ${resumeText}
   "executiveSummary": {
     "strengths": ["Point fort 1", "Point fort 2"],
     "majorGaps": ["Écart 1", "Écart 2"],
-    "blockingAlerts": ["Alerte sur exigence indispensable non vue"],
+    "blockingAlerts": ["Alerte uniquement sur une exigence indispensable réellement absente"],
     "priorityActions": ["Action prioritaire 1"]
   }
 }`;

@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   analyzeJobDescription,
+  extractExperienceRequirement,
+  estimateCandidateExperience,
   matchRequirements,
 } from "@/lib/analysis/job-matcher";
 import type { ParsedResume } from "@/types";
@@ -87,6 +89,107 @@ describe("Job Requirement Analysis & Deterministic Matching", () => {
     // AWS should be missing
     const awsMatch = matches.find((m) => m.requirementLabel === "AWS");
     expect(awsMatch?.status).toBe("missing");
+  });
+
+  it("extracts experience intervals without confusing the upper bound as minimum ('5 à 7 ans', '5 à 10 ans')", () => {
+    const cases = [
+      {
+        text: "Profil : minimum 5 à 7 ans d'expérience sur des projets web.",
+        min: 5,
+        max: 7,
+        label: "5 à 7 ans d'expérience",
+      },
+      {
+        text: "Profil recherché :\n- 5 à 10 ans d'expérience\n- Maîtrise React / Next.js",
+        min: 5,
+        max: 10,
+        label: "5 à 10 ans d'expérience",
+      },
+      {
+        text: "Expérience souhaitée : entre 3 et 5 ans sur Node.js.",
+        min: 3,
+        max: 5,
+        label: "3 à 5 ans d'expérience",
+      },
+      {
+        text: "Seniority: 4 - 6 years of experience required",
+        min: 4,
+        max: 6,
+        label: "4 à 6 ans d'expérience",
+      },
+      {
+        text: "Au moins 5 ans d'expérience professionnelle.",
+        min: 5,
+        max: undefined,
+        label: "5 ans d'expérience minimum",
+      },
+    ];
+
+    for (const c of cases) {
+      const exp = extractExperienceRequirement(c.text);
+      expect(exp).toBeDefined();
+      expect(exp?.minYears).toBe(c.min);
+      expect(exp?.maxYears).toBe(c.max);
+      expect(exp?.label).toBe(c.label);
+
+      const job = analyzeJobDescription(c.text);
+      expect(job.yearsOfExperienceRequired).toBe(c.min);
+      expect(job.yearsOfExperienceMax).toBe(c.max);
+      const expReq = job.requirements.find((r) => r.category === "experience_seniority");
+      expect(expReq?.label).toBe(c.label);
+      expect(expReq?.minYears).toBe(c.min);
+      expect(expReq?.maxYears).toBe(c.max);
+    }
+  });
+
+  it("confirms candidate with 5-6 years of experience when job asks for 'minimum 5 à 7 ans' or '5 à 10 ans'", () => {
+    const jobText = `
+      Poste : Développeur React / Next.js
+      Profil recherché :
+      - Minimum 5 à 7 ans d'expérience
+      - React / Next.js / TypeScript
+    `;
+    const analyzed = analyzeJobDescription(jobText);
+
+    const resume: ParsedResume = {
+      rawText: `
+        Développeur Front-End avec 6 ans d'expérience.
+        EXPÉRIENCES
+        2020 - 2026 : Développeur React / Next.js
+      `,
+      fileName: "cv.pdf",
+      fileType: "pdf",
+      fileSizeBytes: 10000,
+      pageCount: 1,
+      sections: [
+        {
+          title: "Expériences",
+          category: "experience",
+          content: "2020 - 2026 : Développeur React / Next.js",
+          confidence: 0.95,
+        },
+      ],
+      detectedSkills: ["React", "Next.js", "TypeScript"],
+      contactInfo: {
+        hasEmail: true,
+        hasPhone: true,
+        hasLocation: true,
+        hasLinkedIn: false,
+        hasGitHub: false,
+      },
+      extractionWarnings: [],
+      isScannedOrEmpty: false,
+    };
+
+    const est = estimateCandidateExperience(resume);
+    expect(est.years).toBe(6);
+
+    const matches = matchRequirements(analyzed.requirements, resume);
+    const expMatch = matches.find((m) => m.category === "experience_seniority");
+    expect(expMatch).toBeDefined();
+    expect(expMatch?.requirementLabel).toBe("5 à 7 ans d'expérience");
+    expect(expMatch?.status).toBe("confirmed");
+    expect(expMatch?.comment).toContain("5 à 7 ans");
   });
 });
 

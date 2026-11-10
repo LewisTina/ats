@@ -2,6 +2,7 @@ import {
   AIAnalysisResponseSchema,
   buildAIPrompt,
   type AIAnalysisResponse,
+  type AIPromptContext,
 } from "./prompts";
 
 export interface AIProvider {
@@ -9,7 +10,8 @@ export interface AIProvider {
   isConfigured(): boolean;
   analyze(
     resumeText: string,
-    jobText: string
+    jobText: string,
+    context?: AIPromptContext
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }>;
 }
 
@@ -77,7 +79,8 @@ export class ConfigurableLLMProvider implements AIProvider {
 
   async analyze(
     resumeText: string,
-    jobText: string
+    jobText: string,
+    context?: AIPromptContext
   ): Promise<{ success: boolean; data?: AIAnalysisResponse; error?: string }> {
     if (!this.isConfigured()) {
       return {
@@ -86,7 +89,7 @@ export class ConfigurableLLMProvider implements AIProvider {
       };
     }
 
-    const { systemPrompt, userPrompt } = buildAIPrompt(resumeText, jobText);
+    const { systemPrompt, userPrompt } = buildAIPrompt(resumeText, jobText, context);
     const endpoint = `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
 
     const headers: Record<string, string> = {

@@ -73,6 +73,8 @@ export interface JobRequirement {
   required: boolean; // Obligatoire vs Souhaité / Bonus
   sourceText: string;
   importance: number; // 1 to 5
+  minYears?: number;
+  maxYears?: number;
 }
 
 export interface AnalyzedJob {
@@ -81,6 +83,7 @@ export interface AnalyzedJob {
   requirements: JobRequirement[];
   seniorityRequired?: string;
   yearsOfExperienceRequired?: number;
+  yearsOfExperienceMax?: number;
   languages: string[];
   remotePolicy?: string;
 }

@@ -15,8 +15,22 @@ describe("AI Prompt & Schema Validation", () => {
     expect(systemPrompt).toContain("Ne JAMAIS inventer d'expériences");
     expect(systemPrompt).toContain("JavaScript n'est PAS Java");
     expect(systemPrompt).toContain("React n'est PAS automatiquement React Native");
+    expect(systemPrompt).toContain("Ne transforme JAMAIS un intervalle");
     expect(userPrompt).toContain("CV Text Sample");
     expect(userPrompt).toContain("Job Description Sample");
+  });
+
+  it("includes pre-analyzed experience interval and candidate duration in AI prompt context", () => {
+    const { userPrompt } = buildAIPrompt("CV", "Offre", {
+      currentYear: 2026,
+      estimatedCandidateYears: 6,
+      candidateExperienceProof: "2020 - 2026 (~6 ans)",
+      jobMinYears: 5,
+      jobMaxYears: 7,
+    });
+
+    expect(userPrompt).toContain("Intervalle de 5 à 7 ans (seuil minimum = 5 ans");
+    expect(userPrompt).toContain("~6 ans");
   });
 
   it("extracts pure JSON from content with reasoning <think> blocks and code fences", () => {

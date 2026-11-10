@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { runDeterministicAnalysis } from "@/lib/analysis";
 import { runSmartOrFastAnalysis } from "@/lib/analysis/smart-analyzer";
+import * as aiProviderModule from "@/lib/ai/provider";
 import type { ParsedResume } from "@/types";
 
 describe("Full Deterministic & Smart Analysis Pipeline", () => {
@@ -110,5 +111,70 @@ describe("Full Deterministic & Smart Analysis Pipeline", () => {
     if (!result.aiEnriched) {
       expect(result.aiErrorMessage).toBeDefined();
     }
+  });
+
+  it("prevents AI false-negative from downgrading a confirmed experience interval ('5 à 7 ans')", async () => {
+    const spy = vi.spyOn(aiProviderModule, "getAIProvider").mockReturnValue({
+      name: "MOCK_OLLAMA (llama3)",
+      isConfigured: () => true,
+      analyze: async () => ({
+        success: true,
+        data: {
+          jobTitle: "Développeur React/NextJS",
+          requirementsEvaluations: [
+            // Simulate LLM confusing "5 à 7 ans" with "7 ans minimum" and marking a 6-year candidate as partial/missing
+            {
+              label: "7 ans d'expérience minimum",
+              category: "experience_seniority",
+              status: "missing",
+              proof: "5 ans identifiés",
+              explanation: "Le candidat a 5 ans alors que 7 ans sont demandés.",
+              confidence: "medium",
+              required: true,
+            },
+            {
+              label: "React",
+              category: "technical_skill",
+              status: "confirmed",
+              proof: "React, Next.js",
+              explanation: "Maîtrisé",
+              confidence: "high",
+              required: true,
+            },
+          ],
+          contextualRecommendations: [],
+          executiveSummary: {
+            strengths: ["Maîtrise React / Next.js"],
+            majorGaps: ["7 ans d'expérience minimum requis"],
+            blockingAlerts: ["Expérience insuffisante (7 ans minimum)"],
+            priorityActions: [],
+          },
+        },
+      }),
+    } as unknown as aiProviderModule.ConfigurableLLMProvider);
+
+    const rangeJob = `
+      Poste : Développeur React/NextJS
+      Profil recherché :
+      - Minimum 5 à 7 ans d'expérience
+      - Maîtrise de React et Next.js
+    `;
+
+    const result = await runSmartOrFastAnalysis(mockResume, rangeJob, "smart");
+    spy.mockRestore();
+
+    const expItems = result.requirementsMatches.filter(
+      (m) => m.category === "experience_seniority"
+    );
+    // Must not duplicate the experience requirement, and must stay "confirmed"
+    expect(expItems).toHaveLength(1);
+    expect(expItems[0].requirementLabel).toBe("5 à 7 ans d'expérience");
+    expect(expItems[0].status).toBe("confirmed");
+    expect(result.matchingScore.blockingRequirementsFailed).not.toContain(
+      "7 ans d'expérience minimum"
+    );
+    expect(result.summary.blockingAlerts).not.toContain(
+      "Expérience insuffisante (7 ans minimum)"
+    );
   });
 });

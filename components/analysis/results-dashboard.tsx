@@ -260,20 +260,22 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
 
       {/* Blocking alerts warning banner if mandatory requirements failed */}
       {matchingScore.blockingRequirementsFailed.length > 0 && (
-        <div className="flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-700 dark:text-rose-400">
-          <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h4 className="font-semibold text-sm">
-              Attention : Exigences obligatoires non démontrées
-            </h4>
-            <p>
-              L'offre mentionne comme impératif(s) :{" "}
-              <span className="font-bold">
-                {matchingScore.blockingRequirementsFailed.join(", ")}
-              </span>
-              . Ces éléments n'ont pas été identifiés nettement dans le texte
-              extrait de votre CV.
-            </p>
+        <div className="flex bg-rose-500/10 p-4 text-xs text-rose-700 dark:text-rose-400">
+          <div className="w-full max-w-screen-2xl mx-auto flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h4 className="font-semibold text-sm">
+                Attention : Exigences obligatoires non démontrées
+              </h4>
+              <p>
+                L'offre mentionne comme impératif(s) :{" "}
+                <span className="font-bold">
+                  {matchingScore.blockingRequirementsFailed.join(", ")}
+                </span>
+                . Ces éléments n'ont pas été identifiés nettement dans le texte
+                extrait de votre CV.
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -674,9 +676,9 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
             </p>
           </div>
 
-          <div className="p-3 sm:p-5 grid grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] gap-2 text-sm">
+          <div className="bg-background p-3 sm:p-5 grid grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] gap-2 text-sm">
             {/* Strengths */}
-            <div className="rounded-lg border border-border bg-surface-muted/20 p-4">
+            <div className="rounded-lg border border-border bg-surface p-4">
               <h4 className="font-semibold text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4" />
                 Points forts démontrés
@@ -689,7 +691,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
             </div>
 
             {/* Major Gaps */}
-            <div className="rounded-lg border border-border bg-surface-muted/20 p-4">
+            <div className="rounded-lg border border-border bg-surface p-4">
               <h4 className="font-semibold text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-1.5">
                 <HelpCircle className="h-4 w-4" />
                 Principaux écarts identifiés
@@ -702,7 +704,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
             </div>
 
             {/* Blocking alerts */}
-            <div className="rounded-lg border border-border bg-surface-muted/20 p-4">
+            <div className="rounded-lg border border-border bg-surface p-4">
               <h4 className="font-semibold text-rose-700 dark:text-rose-400 mb-2 flex items-center gap-1.5">
                 <AlertTriangle className="h-4 w-4" />
                 Critères bloquants éventuels
@@ -715,7 +717,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
             </div>
 
             {/* Priority actions & Verifications */}
-            <div className="rounded-lg border border-border bg-surface-muted/20 p-4">
+            <div className="rounded-lg border border-border bg-surface p-4">
               <h4 className="font-semibold text-foreground mb-2 flex items-center gap-1.5">
                 <ShieldCheck className="h-4 w-4 text-accent" />
                 Vérifications prioritaires avant envoi

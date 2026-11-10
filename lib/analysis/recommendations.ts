@@ -83,8 +83,11 @@ export function generateRecommendationsAndSummary(
     verifications.push("Contrôler la présence visible de vos coordonnées complètes (e-mail et téléphone).");
   }
   if (job.yearsOfExperienceRequired) {
+    const expText = job.yearsOfExperienceMax
+      ? `la tranche de ${job.yearsOfExperienceRequired} à ${job.yearsOfExperienceMax} années`
+      : `au moins ${job.yearsOfExperienceRequired} années`;
     verifications.push(
-      `Confirmer que vos dates d'expériences font ressortir au moins ${job.yearsOfExperienceRequired} années de pratique pertinentes.`
+      `Confirmer que vos dates d'expériences font ressortir ${expText} de pratique pertinente.`
     );
   }
 

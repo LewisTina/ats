@@ -3,10 +3,30 @@ import type {
   SingleAnalysisResult,
   RequirementMatch,
   Recommendation,
+  RequirementCategory,
 } from "@/types";
 import { runDeterministicAnalysis } from "./index";
 import { getAIProvider } from "@/lib/ai/provider";
 import { calculateMatchingScore } from "./scoring";
+import { estimateCandidateExperience } from "./job-matcher";
+
+function isExperienceRequirementItem(label: string, category?: string): boolean {
+  if (category === "experience_seniority") return true;
+  return /(?:\b\d+\s*(?:[àa]|et|to|[-–—/])?\s*\d*\s*(?:ans?|ann[ée]es?|years?)\b|\bexp[ée]rience\b|\bs[ée]niorit[ée]\b)/i.test(
+    label
+  );
+}
+
+function inferCategoryFromLabel(label: string, explicitCategory?: RequirementCategory): RequirementCategory {
+  if (explicitCategory) return explicitCategory;
+  if (isExperienceRequirementItem(label)) return "experience_seniority";
+  if (/\b(anglais|english|fran[çc]ais|french|langue)\b/i.test(label)) return "language";
+  if (/\b(agile|scrum|kanban|tdd|ci\s*\/\s*cd|m[ée]thodolog)/i.test(label)) return "methodology";
+  if (/\b(autonomie|rigueur|communication|esprit\s+d['’][ée]quipe|relationnel)\b/i.test(label)) {
+    return "soft_skill";
+  }
+  return "technical_skill";
+}
 
 export async function runSmartOrFastAnalysis(
   resume: ParsedResume,
@@ -36,9 +56,17 @@ export async function runSmartOrFastAnalysis(
     };
   }
 
+  const candidateExp = estimateCandidateExperience(resume);
+
   const aiResult = await aiProvider.analyze(
     resume.rawText,
-    jobDescriptionText
+    jobDescriptionText,
+    {
+      estimatedCandidateYears: candidateExp.years,
+      candidateExperienceProof: candidateExp.proof,
+      jobMinYears: baseResult.job.yearsOfExperienceRequired,
+      jobMaxYears: baseResult.job.yearsOfExperienceMax,
+    }
   );
 
   if (!aiResult.success || !aiResult.data) {
@@ -51,18 +79,44 @@ export async function runSmartOrFastAnalysis(
   }
 
   const aiData = aiResult.data;
+  const usedAiIndices = new Set<number>();
 
   // Merge AI insights with deterministic requirements
   const enrichedMatches: RequirementMatch[] = baseResult.requirementsMatches.map((detMatch) => {
-    // Find matching AI requirement
-    const aiItem = aiData.requirementsEvaluations.find(
-      (ai) =>
-        ai.label.toLowerCase() === detMatch.requirementLabel.toLowerCase() ||
-        detMatch.requirementLabel.toLowerCase().includes(ai.label.toLowerCase()) ||
-        ai.label.toLowerCase().includes(detMatch.requirementLabel.toLowerCase())
-    );
+    // Find matching AI requirement (including matching experience items even when labels differ)
+    const aiIndex = aiData.requirementsEvaluations.findIndex((ai, idx) => {
+      if (usedAiIndices.has(idx)) return false;
+      if (
+        detMatch.category === "experience_seniority" &&
+        isExperienceRequirementItem(ai.label, ai.category)
+      ) {
+        return true;
+      }
+      const aiLow = ai.label.toLowerCase();
+      const detLow = detMatch.requirementLabel.toLowerCase();
+      return aiLow === detLow || detLow.includes(aiLow) || aiLow.includes(detLow);
+    });
 
-    if (aiItem) {
+    if (aiIndex !== -1) {
+      usedAiIndices.add(aiIndex);
+      const aiItem = aiData.requirementsEvaluations[aiIndex];
+
+      // Guardrail: if deterministic experience check confirmed the candidate meets the minimum
+      // bound of an experience interval (e.g. 6 yrs for "5 à 7 ans"), never let an AI false-negative
+      // downgrade it to "partial" or "missing".
+      if (detMatch.category === "experience_seniority" && detMatch.status === "confirmed") {
+        return {
+          ...detMatch,
+          status: "confirmed",
+          proofInResume: detMatch.proofInResume || aiItem.proof,
+          comment:
+            aiItem.status === "confirmed" && aiItem.explanation
+              ? aiItem.explanation
+              : detMatch.comment,
+          confidence: "high",
+        };
+      }
+
       return {
         ...detMatch,
         status: aiItem.status,
@@ -75,8 +129,20 @@ export async function runSmartOrFastAnalysis(
     return detMatch;
   });
 
+  const hasDeterministicExp = enrichedMatches.some(
+    (m) => m.category === "experience_seniority"
+  );
+
   // Add any unique requirements discovered by AI that weren't in the basic regex list
-  for (const aiItem of aiData.requirementsEvaluations) {
+  aiData.requirementsEvaluations.forEach((aiItem, idx) => {
+    if (usedAiIndices.has(idx)) return;
+
+    const category = inferCategoryFromLabel(aiItem.label, aiItem.category);
+    // Avoid duplicate experience requirement if deterministic engine already evaluated one
+    if (category === "experience_seniority" && hasDeterministicExp) {
+      return;
+    }
+
     const alreadyExists = enrichedMatches.some(
       (m) => m.requirementLabel.toLowerCase() === aiItem.label.toLowerCase()
     );
@@ -84,7 +150,7 @@ export async function runSmartOrFastAnalysis(
       enrichedMatches.push({
         requirementId: `ai-req-${Math.random().toString(36).substring(2, 6)}`,
         requirementLabel: aiItem.label,
-        category: "technical_skill",
+        category,
         required: aiItem.required,
         status: aiItem.status,
         proofInResume: aiItem.proof,
@@ -92,7 +158,7 @@ export async function runSmartOrFastAnalysis(
         confidence: aiItem.confidence,
       });
     }
-  }
+  });
 
   // Recalculate score deterministically from enriched matches (ensuring AI never invents arbitrary raw scores)
   const updatedMatchingScore = calculateMatchingScore(enrichedMatches);
@@ -125,6 +191,23 @@ export async function runSmartOrFastAnalysis(
     .filter((m) => m.status === "missing")
     .map((m) => ({ name: m.requirementLabel, required: m.required }));
 
+  // Filter out any AI-generated majorGaps or blockingAlerts that falsely claim experience is insufficient when experience is confirmed
+  const isExpConfirmed = enrichedMatches.some(
+    (m) => m.category === "experience_seniority" && m.status === "confirmed"
+  );
+  const filterFalseExpClaims = (items: string[]) =>
+    isExpConfirmed
+      ? items.filter(
+          (item) =>
+            !/(?:\b\d+\s*(?:ans?|ann[ée]es?)\b.*\b(?:minimum|requis|exp[ée]rience)\b|\bexp[ée]rience\b.*\b(?:insuffisant|inf[ée]rieur|manquant|requis))/i.test(
+              item
+            )
+        )
+      : items;
+
+  const filteredGaps = filterFalseExpClaims(aiData.executiveSummary.majorGaps);
+  const filteredBlocking = filterFalseExpClaims(aiData.executiveSummary.blockingAlerts);
+
   return {
     ...baseResult,
     mode: "smart",
@@ -142,11 +225,11 @@ export async function runSmartOrFastAnalysis(
       strengths: aiData.executiveSummary.strengths.length > 0
         ? aiData.executiveSummary.strengths
         : baseResult.summary.strengths,
-      majorGaps: aiData.executiveSummary.majorGaps.length > 0
-        ? aiData.executiveSummary.majorGaps
+      majorGaps: filteredGaps.length > 0
+        ? filteredGaps
         : baseResult.summary.majorGaps,
-      blockingAlerts: aiData.executiveSummary.blockingAlerts.length > 0
-        ? aiData.executiveSummary.blockingAlerts
+      blockingAlerts: filteredBlocking.length > 0
+        ? filteredBlocking
         : baseResult.summary.blockingAlerts,
       priorityActions: aiData.executiveSummary.priorityActions.length > 0
         ? aiData.executiveSummary.priorityActions
