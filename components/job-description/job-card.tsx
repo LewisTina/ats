@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Briefcase, Eraser, Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import { CircleCheck, CloudDownload, Eraser, Link2, LoaderCircle, Sparkles, TriangleAlert } from "lucide-react";
 import Panel from "../blocks/panel";
 
 interface JobCardProps {
@@ -80,8 +80,45 @@ Compétences indispensables :
   },
 ];
 
+type FetchStatus =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "success"; message: string }
+  | { kind: "error"; message: string };
+
 export function JobCard({ value, onChange, onClear }: JobCardProps) {
   const charCount = value.length;
+  const [url, setUrl] = useState("");
+  const [status, setStatus] = useState<FetchStatus>({ kind: "idle" });
+
+  const handleFetch = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const trimmed = url.trim();
+    if (!trimmed || status.kind === "loading") return;
+
+    setStatus({ kind: "loading" });
+    try {
+      const res = await fetch("/api/fetch-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: trimmed }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.text) {
+        throw new Error(data.error ?? "Impossible de récupérer l'offre.");
+      }
+      onChange(data.text);
+      setStatus({
+        kind: "success",
+        message: `Offre récupérée${data.title ? ` : ${data.title}` : ""}. Vérifiez le texte avant de lancer l'analyse.`,
+      });
+    } catch (error) {
+      setStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Impossible de récupérer l'offre.",
+      });
+    }
+  };
 
   return (
     <Panel
@@ -104,13 +141,58 @@ export function JobCard({ value, onChange, onClear }: JobCardProps) {
       }
       title={"Offre d'emploi"}
     >
+      {/* Import from URL */}
+      <form onSubmit={handleFetch} className="mb-3 flex flex-col gap-1.5">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
+            <input
+              type="url"
+              inputMode="url"
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (status.kind !== "loading") setStatus({ kind: "idle" });
+              }}
+              placeholder="https://… URL de l'offre (Welcome to the Jungle, France Travail, site carrière…)"
+              aria-label="URL de l'offre d'emploi"
+              className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={!url.trim() || status.kind === "loading"}
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-muted/60 px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-surface-muted hover:text-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {status.kind === "loading" ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <CloudDownload className="h-4 w-4" />
+            )}
+            <span>{status.kind === "loading" ? "Récupération…" : "Récupérer"}</span>
+          </button>
+        </div>
+        {status.kind === "error" && (
+          <p role="alert" className="flex items-start gap-1.5 text-xs text-rose-600">
+            <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            {status.message}
+          </p>
+        )}
+        {status.kind === "success" && (
+          <p role="status" className="flex items-start gap-1.5 text-xs text-emerald-600">
+            <CircleCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            {status.message}
+          </p>
+        )}
+      </form>
+
       <div className="relative flex-1">
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Collez ici la description complète de l'offre d'emploi (intitulé, missions, compétences techniques requises, technologies souhaitées, expérience...)..."
           rows={9}
-          className="w-full h-full resize-none rounded-lg border border-border bg-background p-3.5 text-sm text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-foreground/20 leading-relaxed font-sans pb-12"
+          className="w-full h-full resize-none rounded-lg border border-border bg-background p-3.5 text-sm text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-foreground/20 leading-relaxed font-sans pb-20"
         />
 
         {/* Quick sample insertion */}
