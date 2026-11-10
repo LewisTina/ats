@@ -33,7 +33,7 @@ export function LoadingProgress({ currentStage }: LoadingProgressProps) {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-8 shadow-xs my-6">
+    <div className="flex flex-col flex-1 items-center justify-center bg-surface p-8">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent mb-4">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
@@ -57,8 +57,8 @@ export function LoadingProgress({ currentStage }: LoadingProgressProps) {
                 isCurrent
                   ? "border-accent/40 bg-accent/5 text-foreground font-medium"
                   : isDone
-                  ? "border-border/60 bg-surface text-foreground/70"
-                  : "border-transparent text-foreground/40"
+                    ? "border-border/60 bg-surface text-foreground/70"
+                    : "border-transparent text-foreground/40"
               }`}
             >
               <div
@@ -66,8 +66,8 @@ export function LoadingProgress({ currentStage }: LoadingProgressProps) {
                   isDone
                     ? "bg-emerald-500 text-white"
                     : isCurrent
-                    ? "bg-accent text-white"
-                    : "bg-surface-muted text-foreground/40"
+                      ? "bg-accent text-white"
+                      : "bg-surface-muted text-foreground/40"
                 }`}
               >
                 {isDone ? <Check className="h-2.5 w-2.5" /> : idx + 1}
@@ -80,4 +80,3 @@ export function LoadingProgress({ currentStage }: LoadingProgressProps) {
     </div>
   );
 }
-

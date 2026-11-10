@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Briefcase, Eraser, Sparkles } from "lucide-react";
-import Panel from "../layout/panel";
+import Panel from "../blocks/panel";
 
 interface JobCardProps {
   value: string;

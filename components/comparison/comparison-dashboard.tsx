@@ -22,6 +22,9 @@ import type {
 import { FileUploadCard } from "@/components/upload/file-upload-card";
 import { JobCard } from "@/components/job-description/job-card";
 import { ResultsDashboard } from "@/components/analysis/results-dashboard";
+import Heading from "../blocks/heading";
+import Panel from "../blocks/panel";
+import Button from "../ui/button";
 
 interface MultiCVItem {
   id: string;
@@ -143,120 +146,100 @@ export function ComparisonDashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col flex-1 divide-y divide-border">
       {/* Introduction */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Comparateur multi-versions de CV
-        </h1>
-        <p className="mt-1 text-sm text-foreground/60">
-          Importez vos différentes versions de CV face à la même offre et
-          découvrez objectivement la version la plus adaptée.
-        </p>
-      </div>
 
-      {/* Shared Job Offer Input */}
-      <div className="rounded-xl border border-border bg-surface p-5 shadow-xs">
-        <JobCard
-          value={jobDescription}
-          onChange={setJobDescription}
-          onClear={() => setJobDescription("")}
-        />
-      </div>
-
-      {/* CV Slots */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-foreground tracking-tight">
-              Versions de vos CV à comparer ({validResumesCount} prêt(s))
-            </h2>
-            <p className="text-xs text-foreground/60">
-              Au moins 2 CV requis pour exécuter la comparaison
-            </p>
-          </div>
-
-          <button
+      <Heading
+        title={"Comparateur multi-versions de CV"}
+        description={
+          "Importez vos différentes versions de CV face à la même offre et découvrez objectivement la version la plus adaptée."
+        }
+        errorMessage={errorMessage}
+        action={
+          <Button
             type="button"
-            onClick={addCvSlot}
-            className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors"
+            label={
+              isLoading
+                ? "Comparaison en cours…"
+                : "Comparer mes versions de CV"
+            }
+            icon="ArrowRight"
+            onClick={handleRunComparison}
+            disabled={!canCompare || isLoading}
+            isLoading={isLoading}
+          />
+        }
+      />
+      {/* Shared Job Offer Input */}
+      <div className="border-b border-border bg-surface flex-1 flex">
+        <div className="w-full max-w-[1584px] mx-auto grid grid-cols-1 md:grid-cols-2 items-start divide-x divide-border border-x border-border flex-1">
+          <JobCard
+            value={jobDescription}
+            onChange={setJobDescription}
+            onClear={() => setJobDescription("")}
+          />
+
+          {/* CV Slots */}
+          <Panel
+            icon={"FolderOpen"}
+            subtitle={`Au moins 2 CV requis pour exécuter la comparaison`}
+            title={`Versions de vos CV à comparer (${validResumesCount} prêt(s))`}
+            action={
+              <button
+                type="button"
+                onClick={addCvSlot}
+                className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Ajouter une version</span>
+              </button>
+            }
           >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Ajouter une version</span>
-          </button>
-        </div>
+            <div className="divide-y divide-border -m-5">
+              {cvList.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col divide-y divide-border"
+                >
+                  <div className="flex items-center justify-between gap-2 p-4 bg-background">
+                    <input
+                      type="text"
+                      value={item.label}
+                      onChange={(e) => updateLabel(item.id, e.target.value)}
+                      className="rounded border border-transparent bg-transparent px-1.5 py-0.5 text-xs font-bold text-foreground hover:border-border focus:border-accent focus:bg-background focus:outline-hidden"
+                      placeholder="Nom de la version..."
+                    />
+                    {cvList.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => removeCvSlot(item.id)}
+                        className="text-foreground/40 hover:text-rose-600 transition-colors p-1"
+                        title="Supprimer cette version"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {cvList.map((item, index) => (
-            <div
-              key={item.id}
-              className="flex flex-col rounded-xl border border-border bg-surface p-4 shadow-xs"
-            >
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <input
-                  type="text"
-                  value={item.label}
-                  onChange={(e) => updateLabel(item.id, e.target.value)}
-                  className="rounded border border-transparent bg-transparent px-1.5 py-0.5 text-xs font-bold text-foreground hover:border-border focus:border-accent focus:bg-background focus:outline-hidden"
-                  placeholder="Nom de la version..."
-                />
-                {cvList.length > 2 && (
-                  <button
-                    type="button"
-                    onClick={() => removeCvSlot(item.id)}
-                    className="text-foreground/40 hover:text-rose-600 transition-colors p-1"
-                    title="Supprimer cette version"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-
-              <FileUploadCard
-                label={`Document ${index + 1}`}
-                parsedResume={item.parsedResume}
-                onParsed={(res) => updateParsedResume(item.id, res)}
-                onClear={() =>
-                  setCvList((prev) =>
-                    prev.map((it) =>
-                      it.id === item.id ? { ...it, parsedResume: null } : it,
-                    ),
-                  )
-                }
-              />
+                  <FileUploadCard
+                    label={`Document ${index + 1}`}
+                    parsedResume={item.parsedResume}
+                    onParsed={(res) => updateParsedResume(item.id, res)}
+                    onClear={() =>
+                      setCvList((prev) =>
+                        prev.map((it) =>
+                          it.id === item.id
+                            ? { ...it, parsedResume: null }
+                            : it,
+                        ),
+                      )
+                    }
+                  />
+                </div>
+              ))}
             </div>
-          ))}
+          </Panel>
         </div>
-      </div>
-
-      {/* Comparison Action */}
-      <div className="flex flex-col items-center justify-center gap-3 pt-2">
-        <button
-          type="button"
-          onClick={handleRunComparison}
-          disabled={!canCompare || isLoading}
-          className={`flex w-full max-w-md items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold transition-all shadow-xs ${
-            !canCompare || isLoading
-              ? "cursor-not-allowed bg-surface-muted text-foreground/40 border border-border"
-              : "cursor-pointer bg-foreground text-background hover:opacity-90 active:scale-[0.99]"
-          }`}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Comparaison en cours…</span>
-            </>
-          ) : (
-            <>
-              <span>Comparer mes versions de CV</span>
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
-
-        {errorMessage && (
-          <p className="text-xs text-rose-600 font-medium">{errorMessage}</p>
-        )}
       </div>
 
       {/* Results View */}

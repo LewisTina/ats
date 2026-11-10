@@ -56,8 +56,8 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/80 backdrop-blur-md  px-4 sm:px-6">
-      <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/80 backdrop-blur-md">
+      <div className="mx-auto flex p-4 sm:px-6 max-w-[1584px] border-x border-border items-center justify-between">
         {/* Left: Branding */}
         <div className="flex items-center gap-3">
           <div>

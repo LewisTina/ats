@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { ParsedResume } from "@/types";
 import { formatFileSize } from "@/lib/utils";
-import Panel from "../layout/panel";
+import Panel from "../blocks/panel";
 
 interface FileUploadCardProps {
   label?: string;

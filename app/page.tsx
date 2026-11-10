@@ -9,11 +9,10 @@ import { LoadingProgress } from "@/components/analysis/loading-progress";
 import { ResultsDashboard } from "@/components/analysis/results-dashboard";
 import { ComparisonDashboard } from "@/components/comparison/comparison-dashboard";
 import { HistoryModal } from "@/components/history/history-modal";
-import type {
-  ParsedResume,
-  SingleAnalysisResult,
-  AnalysisMode,
-} from "@/types";
+import type { ParsedResume, SingleAnalysisResult, AnalysisMode } from "@/types";
+import Heading from "@/components/blocks/heading";
+import { ArrowRight } from "lucide-react";
+import Button from "@/components/ui/button";
 
 const LOCAL_STORAGE_HISTORY_KEY = "cv_analyzer_history_v1";
 
@@ -147,27 +146,24 @@ export default function HomePage() {
             }}
           />
         ) : (
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col flex-1 divide-y divide-border">
             {/* Hero / Intro */}
-            <div className="flex px-4 sm:px-6 border-b border-border">
-              <div className="w-full max-w-screen-2xl mx-auto space-y-2 py-4">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Analysez votre CV avant de postuler.
-                </h1>
-                <p className="max-w-3xl text-sm text-foreground/60 leading-relaxed">
-                  Comparez votre CV à une offre d'emploi, identifiez les écarts,
-                  évaluez sa lisibilité par les systèmes ATS et découvrez
-                  comment améliorer votre candidature.
-                </p>
-              </div>
-            </div>
-
-            {/* Error banner if any */}
-            {errorMessage && (
-              <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-600 dark:text-rose-400">
-                {errorMessage}
-              </div>
-            )}
+            <Heading
+              title={"Analysez votre CV avant de postuler."}
+              description={
+                "Comparez votre CV à une offre d'emploi, identifiez les écarts, évaluez sa lisibilité par les systèmes ATS et découvrez comment améliorer votre candidature."
+              }
+              errorMessage={errorMessage}
+              action={
+                <Button
+                  type="button"
+                  label="Analyser ma candidature"
+                  icon="ArrowRight"
+                  onClick={handleStartAnalysis}
+                  disabled={!canAnalyze || isLoading}
+                />
+              }
+            />
 
             {/* Loading Progression State */}
             {isLoading ? (
@@ -175,8 +171,8 @@ export default function HomePage() {
             ) : (
               <>
                 {/* Two Main Cards: Resume (Left) + Job Description (Right) */}
-                <div className="flex flex-1 px-4 sm:px-6 bg-surface">
-                  <div className="w-full max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 items-start divide-x divide-border border-x border-border">
+                <div className="flex flex-1 bg-surface">
+                  <div className="w-full mx-auto grid grid-cols-1 md:grid-cols-2 items-start divide-x divide-border max-w-[1584px] border-x border-border">
                     <FileUploadCard
                       label="Votre CV"
                       parsedResume={parsedResume}
@@ -201,9 +197,6 @@ export default function HomePage() {
                 <AnalysisOptions
                   analysisMode={analysisMode}
                   onModeChange={setAnalysisMode}
-                  onAnalyze={handleStartAnalysis}
-                  canAnalyze={canAnalyze}
-                  isLoading={isLoading}
                 />
               </>
             )}

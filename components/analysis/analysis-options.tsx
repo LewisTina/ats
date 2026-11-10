@@ -1,31 +1,20 @@
 "use client";
 
 import React from "react";
-import {
-  Cpu,
-  Zap,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
+import { Cpu, Zap, Sparkles, ArrowRight } from "lucide-react";
 import type { AnalysisMode } from "@/types";
 
 interface AnalysisOptionsProps {
   analysisMode: AnalysisMode;
   onModeChange: (mode: AnalysisMode) => void;
-  onAnalyze: () => void;
-  canAnalyze: boolean;
-  isLoading: boolean;
 }
 
 export function AnalysisOptions({
   analysisMode,
   onModeChange,
-  onAnalyze,
-  canAnalyze,
-  isLoading,
 }: AnalysisOptionsProps) {
   return (
-    <div className="flex flex-col gap-5 rounded-xl border border-border bg-surface p-5 shadow-xs">
+    <div className="flex flex-col px-4 sm:px-6 py-4 gap-4 bg-surface">
       {/* Mode d'analyse */}
       <div className="space-y-2.5">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground tracking-tight">
@@ -96,23 +85,6 @@ export function AnalysisOptions({
             </span>
           </button>
         </div>
-      </div>
-
-      {/* Main Action Button */}
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={onAnalyze}
-          disabled={!canAnalyze || isLoading}
-          className={`flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold transition-all shadow-xs ${
-            !canAnalyze || isLoading
-              ? "cursor-not-allowed bg-surface-muted text-foreground/40 border border-border"
-              : "cursor-pointer bg-foreground text-background hover:opacity-90 active:scale-[0.99]"
-          }`}
-        >
-          <span>Analyser ma candidature</span>
-          <ArrowRight className="h-4 w-4" />
-        </button>
       </div>
     </div>
   );
