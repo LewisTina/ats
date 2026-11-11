@@ -44,7 +44,7 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
   return (
     <div className="flex flex-col divide-y divide-border">
       {/* Top Bar with Job & CV identity */}
-      <div className="flex flex-col px-4 sm:px-6 py-4 gap-4">
+      <div className="flex flex-col gap-4  p-4">
         <div className="w-full max-w-screen-2xl mx-auto flex gap-4 justify-between items-end flex-col sm:flex-row">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -95,16 +95,18 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* AI banner or fallback notice */}
-        {result.mode === "smart" && (
-          <div
-            className={`rounded-xl border p-4 text-xs w-full max-w-screen-2xl mx-auto ${
-              result.aiEnriched
-                ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
-                : "border-amber-500/20 bg-amber-500/5 text-amber-800 dark:text-amber-300"
-            }`}
-          >
+      {/* AI banner or fallback notice */}
+      {result.mode === "smart" && (
+        <div
+          className={`flex border-t p-4 ${
+            result.aiEnriched
+              ? "bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
+              : "bg-amber-500/5 text-amber-800 dark:text-amber-300"
+          }`}
+        >
+          <div className="w-full max-w-screen-2xl mx-auto flex items-start gap-3">
             <div className="flex items-start gap-2.5">
               <Sparkles className="h-4 w-4 shrink-0 mt-0.5" />
               <div className="space-y-1">
@@ -121,8 +123,8 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ============================================================== */}
       {/* SECTION 1 — VUE D'ENSEMBLE (DEUX SCORES DISTINCTS) */}
