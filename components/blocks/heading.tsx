@@ -1,3 +1,5 @@
+import Alert from "../ui/alert";
+
 export default function Heading(props: {
   title: string;
   description: string;
@@ -26,9 +28,11 @@ export default function Heading(props: {
 
       {/* Error banner if any */}
       {errorMessage && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-600 dark:text-rose-400 w-full max-w-screen-2xl mx-auto">
-          {errorMessage}
-        </div>
+        <Alert
+          variant="error"
+          description={errorMessage}
+          className="w-full max-w-screen-2xl mx-auto rounded-xl p-4 text-xs font-semibold"
+        />
       )}
     </div>
   );

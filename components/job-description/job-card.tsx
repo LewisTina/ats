@@ -1,8 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { CircleCheck, CloudDownload, Eraser, Link2, LoaderCircle, Sparkles, TriangleAlert } from "lucide-react";
+import {
+  CloudDownload,
+  Eraser,
+  Link2,
+  LoaderCircle,
+  Sparkles,
+} from "lucide-react";
 import Panel from "../blocks/panel";
+import Alert from "../ui/alert";
 
 interface JobCardProps {
   value: string;
@@ -115,7 +122,10 @@ export function JobCard({ value, onChange, onClear }: JobCardProps) {
     } catch (error) {
       setStatus({
         kind: "error",
-        message: error instanceof Error ? error.message : "Impossible de récupérer l'offre.",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Impossible de récupérer l'offre.",
       });
     }
   };
@@ -169,20 +179,24 @@ export function JobCard({ value, onChange, onClear }: JobCardProps) {
             ) : (
               <CloudDownload className="h-4 w-4" />
             )}
-            <span>{status.kind === "loading" ? "Récupération…" : "Récupérer"}</span>
+            <span>
+              {status.kind === "loading" ? "Récupération…" : "Récupérer"}
+            </span>
           </button>
         </div>
         {status.kind === "error" && (
-          <p role="alert" className="flex items-start gap-1.5 text-xs text-rose-600">
-            <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            {status.message}
-          </p>
+          <Alert
+            variant="error"
+            description={status.message}
+            className="gap-1.5 rounded-none border-0 bg-transparent p-0 text-xs"
+          />
         )}
         {status.kind === "success" && (
-          <p role="status" className="flex items-start gap-1.5 text-xs text-emerald-600">
-            <CircleCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            {status.message}
-          </p>
+          <Alert
+            variant="success"
+            description={status.message}
+            className="gap-1.5 rounded-none border-0 bg-transparent p-0 text-xs"
+          />
         )}
       </form>
 

@@ -6,13 +6,13 @@ import {
   AlertTriangle,
   XCircle,
   HelpCircle,
-  Sparkles,
   ShieldCheck,
   RefreshCw,
   Copy,
   Check,
 } from "lucide-react";
 import type { SingleAnalysisResult } from "@/types";
+import Alert from "@/components/ui/alert";
 
 interface ResultsDashboardProps {
   result: SingleAnalysisResult;
@@ -99,31 +99,21 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
 
       {/* AI banner or fallback notice */}
       {result.mode === "smart" && (
-        <div
-          className={`flex border-t p-4 ${
+        <Alert
+          variant={result.aiEnriched ? "success" : "warning"}
+          icon="Sparkles"
+          title={
             result.aiEnriched
-              ? "bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
-              : "bg-amber-500/5 text-amber-800 dark:text-amber-300"
-          }`}
-        >
-          <div className="w-full max-w-screen-2xl mx-auto flex items-start gap-3">
-            <div className="flex items-start gap-2.5">
-              <Sparkles className="h-4 w-4 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-semibold">
-                  {result.aiEnriched
-                    ? `Analyse sémantique enrichie par IA (${result.aiProviderUsed})`
-                    : "Analyse déterministe locale (Fournisseur IA non actif)"}
-                </p>
-                <p className="text-md opacity-90">
-                  {result.aiEnriched
-                    ? "Les correspondances et recommandations ont été affinées par compréhension sémantique de vos réalisations. Les scores restent calculés de façon déterministe."
-                    : result.aiErrorMessage}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+              ? `Analyse sémantique enrichie par IA (${result.aiProviderUsed})`
+              : "Analyse déterministe locale (Fournisseur IA non actif)"
+          }
+          description={
+            result.aiEnriched
+              ? "Les correspondances et recommandations ont été affinées par compréhension sémantique de vos réalisations. Les scores restent calculés de façon déterministe."
+              : result.aiErrorMessage
+          }
+          className="border-x-0 border-b-0 border-t p-4 rounded-none"
+        />
       )}
 
       {/* ============================================================== */}
@@ -262,24 +252,13 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
 
       {/* Blocking alerts warning banner if mandatory requirements failed */}
       {matchingScore.blockingRequirementsFailed.length > 0 && (
-        <div className="flex bg-rose-500/10 p-4 text-xs text-rose-700 dark:text-rose-400">
-          <div className="w-full max-w-screen-2xl mx-auto flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <h4 className="font-semibold text-sm">
-                Attention : Exigences obligatoires non démontrées
-              </h4>
-              <p>
-                L'offre mentionne comme impératif(s) :{" "}
-                <span className="font-bold">
-                  {matchingScore.blockingRequirementsFailed.join(", ")}
-                </span>
-                . Ces éléments n'ont pas été identifiés nettement dans le texte
-                extrait de votre CV.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert
+          variant="error"
+          icon="TriangleExclamationPoint"
+          title="Attention : Exigences obligatoires non démontrées"
+          description={`L'offre mentionne comme impératif(s) : ${matchingScore.blockingRequirementsFailed.join(", ")}. Ces éléments n'ont pas été identifiés nettement dans le texte extrait de votre CV.`}
+          className="rounded-none border-x-0 border-b-0 p-4 text-xs"
+        />
       )}
 
       {/* ============================================================== */}
@@ -552,13 +531,12 @@ export function ResultsDashboard({ result, onReset }: ResultsDashboardProps) {
           </div>
 
           {result.atsDiagnostics.length === 0 ? (
-            <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 m-3 sm:m-5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
-              <span>
-                Aucune anomalie bloquante de lecture ATS n'a été détectée.
-                Structure claire et fluide.
-              </span>
-            </div>
+            <Alert
+              variant="success"
+              icon="CircleCheck"
+              description="Aucune anomalie bloquante de lecture ATS n'a été détectée. Structure claire et fluide."
+              className="m-3 items-center rounded-lg p-4 text-xs font-medium sm:m-5"
+            />
           ) : (
             <div className="space-y-3">
               {result.atsDiagnostics.map((diag) => (

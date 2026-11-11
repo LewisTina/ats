@@ -7,7 +7,6 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
-  AlertTriangle,
   Loader2,
   FileText,
 } from "lucide-react";
@@ -15,6 +14,7 @@ import type { ParsedResume } from "@/types";
 import { formatFileSize } from "@/lib/utils";
 import Panel from "../blocks/panel";
 import clsx from "clsx";
+import Alert from "../ui/alert";
 
 interface FileUploadCardProps {
   label?: string;
@@ -187,24 +187,13 @@ export function FileUploadCard({
           {parsedResume.extractionWarnings.length > 0 && (
             <div className="space-y-1.5">
               {parsedResume.extractionWarnings.map((warn, i) => (
-                <div
+                <Alert
                   key={i}
-                  className={`flex items-start gap-2 rounded-md p-2.5 text-xs ${
-                    warn.severity === "error"
-                      ? "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
-                      : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20"
-                  }`}
-                >
-                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <p className="font-medium">{warn.message}</p>
-                    {warn.recommendation && (
-                      <p className="text-sm opacity-90">
-                        {warn.recommendation}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  variant={warn.severity === "error" ? "error" : "warning"}
+                  title={warn.message}
+                  description={warn.recommendation}
+                  className="p-2.5 text-xs"
+                />
               ))}
             </div>
           )}
@@ -242,10 +231,11 @@ export function FileUploadCard({
       )}
 
       {errorMessage && (
-        <div className="mt-3 flex shrink-0 items-center gap-2 rounded-md bg-rose-500/10 p-2.5 text-xs font-medium text-rose-600 dark:text-rose-400 border border-rose-500/20">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
+        <Alert
+          variant="error"
+          description={errorMessage}
+          className="mt-3 shrink-0 p-2.5 text-xs font-medium"
+        />
       )}
     </Panel>
   );
